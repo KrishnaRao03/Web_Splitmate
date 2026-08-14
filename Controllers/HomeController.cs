@@ -34,9 +34,25 @@ public class HomeController : Controller
         return View(_store.GetDashboard());
     }
 
-    public IActionResult DemoGuide()
+    public IActionResult Groups()
     {
         return View(_store.GetDashboard());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult CreateGroup(CreateGroupFormModel form)
+    {
+        TrySave(() => _store.CreateGroup(form), "Group created and selected.");
+        return RedirectToAction(nameof(Groups));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult SelectGroup(int id)
+    {
+        TrySave(() => _store.SelectGroup(id), "Active group changed.");
+        return RedirectToAction(nameof(Groups));
     }
 
     [HttpPost]

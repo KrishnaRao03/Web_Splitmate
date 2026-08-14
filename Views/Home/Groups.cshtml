@@ -1,0 +1,100 @@
+@model SplitmateDashboardViewModel
+
+@{
+    ViewData["Title"] = "Groups";
+}
+
+<section class="page-header">
+    <div>
+        <span class="eyebrow">Splitmate feature</span>
+        <h1>Create and switch groups</h1>
+        <p>Build a shared expense group with members, then track that group separately across expenses, balances, payments, notes, and tasks.</p>
+    </div>
+    <div class="progress-card">
+        <strong>@Model.Groups.Count</strong>
+        <span>saved groups</span>
+    </div>
+</section>
+
+<section class="content-grid form-layout">
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Create</span>
+                <h2>New group</h2>
+            </div>
+        </div>
+        <form asp-controller="Home" asp-action="CreateGroup" method="post" class="stacked-form">
+            <label>
+                Group name
+                <input name="Name" class="form-control" placeholder="Apartment 402, Road Trip, Study Team..." required />
+            </label>
+            <label>
+                Description
+                <textarea name="Description" class="form-control" rows="3" placeholder="What this group is used for"></textarea>
+            </label>
+            <label>
+                Members
+                <textarea name="MembersInput" class="form-control" rows="5" placeholder="Krishna | krishna@example.com&#10;Aanya | aanya@example.com&#10;Mateo | mateo@example.com" required></textarea>
+                <span class="form-hint">Enter one member per line. Email is optional, but use Name | email when you have it.</span>
+            </label>
+            <button type="submit" class="btn btn-primary">Create group</button>
+        </form>
+    </article>
+
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Active group</span>
+                <h2>@Model.Group.Name</h2>
+            </div>
+            <span class="status-chip">@Model.Group.Members.Count members</span>
+        </div>
+        <p class="empty-state">@Model.Group.Description</p>
+        <div class="member-list">
+            @foreach (var member in Model.Group.Members)
+            {
+                <div>
+                    <strong>@member.Name</strong>
+                    <span>@member.Email</span>
+                    <em>@member.Role</em>
+                </div>
+            }
+        </div>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">Groups</span>
+            <h2>Saved group list</h2>
+        </div>
+    </div>
+    <div class="group-grid">
+        @foreach (var group in Model.Groups)
+        {
+            <article class="group-card @(group.Id == Model.ActiveGroupId ? "active" : "")">
+                <div>
+                    <span class="eyebrow">Created @group.CreatedOn.ToString("MMM d")</span>
+                    <h3>@group.Name</h3>
+                    <p>@group.Description</p>
+                </div>
+                <div class="group-card-footer">
+                    <span>@group.Members.Count members</span>
+                    @if (group.Id == Model.ActiveGroupId)
+                    {
+                        <strong>Active</strong>
+                    }
+                    else
+                    {
+                        <form asp-controller="Home" asp-action="SelectGroup" method="post">
+                            <input type="hidden" name="id" value="@group.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Select</button>
+                        </form>
+                    }
+                </div>
+            </article>
+        }
+    </div>
+</section>

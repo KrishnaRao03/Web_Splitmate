@@ -14,9 +14,9 @@ function refreshShareHint() {
     shareInput.value = "";
     shareHint.textContent = "Equal split does not need custom shares.";
   } else if (method === "Exact") {
-    shareHint.textContent = "Enter dollar amounts, for example: Krishna=12, Aanya=12, Mateo=10.75, Priya=12";
+    shareHint.textContent = "Enter dollar amounts with the current member names, for example: Name=12, Name=18";
   } else {
-    shareHint.textContent = "Enter percentages totaling 100, for example: Krishna=25, Aanya=25, Mateo=25, Priya=25";
+    shareHint.textContent = "Enter percentages with the current member names. The total must equal 100.";
   }
 }
 

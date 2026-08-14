@@ -6,16 +6,10 @@ namespace Final_Project.Services;
 public class SplitmateStore
 {
     private readonly object _gate = new();
-    private readonly SplitmateGroup _group = new();
-    private readonly List<Expense> _expenses = new();
-    private readonly List<Payment> _payments = new();
-    private readonly List<GroupNote> _notes = new();
-    private readonly List<GroupTask> _tasks = new();
+    private readonly List<GroupState> _groups = new();
     private readonly string[] _splitMethods = { "Equal", "Exact", "Percentage" };
-    private int _nextExpenseId = 1;
-    private int _nextPaymentId = 1;
-    private int _nextNoteId = 1;
-    private int _nextTaskId = 1;
+    private int _activeGroupId;
+    private int _nextGroupId = 1;
 
     public SplitmateStore()
     {
@@ -26,17 +20,64 @@ public class SplitmateStore
     {
         lock (_gate)
         {
+            var state = ActiveGroup();
+
             return new SplitmateDashboardViewModel
             {
-                Group = _group,
-                Expenses = _expenses.ToList(),
-                Payments = _payments.ToList(),
-                Notes = _notes.ToList(),
-                Tasks = _tasks.ToList(),
-                Balances = BuildBalances(),
-                Settlements = BuildSettlements(),
-                SplitMethods = _splitMethods.ToList()
+                Group = state.Group,
+                Groups = _groups.Select(group => group.Group).ToList(),
+                Expenses = state.Expenses.ToList(),
+                Payments = state.Payments.ToList(),
+                Notes = state.Notes.ToList(),
+                Tasks = state.Tasks.ToList(),
+                Balances = BuildBalances(state),
+                Settlements = BuildSettlements(state),
+                SplitMethods = _splitMethods.ToList(),
+                ActiveGroupId = state.Group.Id
             };
+        }
+    }
+
+    public int CreateGroup(CreateGroupFormModel form)
+    {
+        lock (_gate)
+        {
+            if (string.IsNullOrWhiteSpace(form.Name))
+            {
+                throw new InvalidOperationException("Group name is required.");
+            }
+
+            var members = ParseMembers(form.MembersInput);
+            var state = new GroupState
+            {
+                Group = new SplitmateGroup
+                {
+                    Id = _nextGroupId++,
+                    Name = form.Name.Trim(),
+                    Description = string.IsNullOrWhiteSpace(form.Description)
+                        ? "A new Splitmate group for shared expenses, notes, tasks, and payments."
+                        : form.Description.Trim(),
+                    CreatedOn = DateTime.Now,
+                    Members = members
+                }
+            };
+
+            _groups.Add(state);
+            _activeGroupId = state.Group.Id;
+            return state.Group.Id;
+        }
+    }
+
+    public void SelectGroup(int id)
+    {
+        lock (_gate)
+        {
+            if (_groups.All(group => group.Group.Id != id))
+            {
+                throw new InvalidOperationException("That group could not be found.");
+            }
+
+            _activeGroupId = id;
         }
     }
 
@@ -44,6 +85,8 @@ public class SplitmateStore
     {
         lock (_gate)
         {
+            var state = ActiveGroup();
+
             if (string.IsNullOrWhiteSpace(form.Description))
             {
                 throw new InvalidOperationException("Expense description is required.");
@@ -54,19 +97,19 @@ public class SplitmateStore
                 throw new InvalidOperationException("Expense amount must be greater than zero.");
             }
 
-            var paidBy = NormalizeMember(form.PaidBy);
+            var paidBy = NormalizeMember(state, form.PaidBy);
             var method = NormalizeSplitMethod(form.SplitMethod);
             var amount = Money(form.Amount);
 
-            _expenses.Insert(0, new Expense
+            state.Expenses.Insert(0, new Expense
             {
-                Id = _nextExpenseId++,
+                Id = state.NextExpenseId++,
                 Description = form.Description.Trim(),
                 Amount = amount,
                 PaidBy = paidBy,
                 SplitMethod = method,
                 CreatedOn = DateTime.Now,
-                Shares = BuildShares(amount, method, form.ShareInput)
+                Shares = BuildShares(state, amount, method, form.ShareInput)
             });
         }
     }
@@ -75,8 +118,9 @@ public class SplitmateStore
     {
         lock (_gate)
         {
-            var fromMember = NormalizeMember(form.FromMember);
-            var toMember = NormalizeMember(form.ToMember);
+            var state = ActiveGroup();
+            var fromMember = NormalizeMember(state, form.FromMember);
+            var toMember = NormalizeMember(state, form.ToMember);
 
             if (fromMember == toMember)
             {
@@ -88,9 +132,9 @@ public class SplitmateStore
                 throw new InvalidOperationException("Payment amount must be greater than zero.");
             }
 
-            _payments.Insert(0, new Payment
+            state.Payments.Insert(0, new Payment
             {
-                Id = _nextPaymentId++,
+                Id = state.NextPaymentId++,
                 FromMember = fromMember,
                 ToMember = toMember,
                 Amount = Money(form.Amount),
@@ -104,17 +148,19 @@ public class SplitmateStore
     {
         lock (_gate)
         {
+            var state = ActiveGroup();
+
             if (string.IsNullOrWhiteSpace(form.Title))
             {
                 throw new InvalidOperationException("Note title is required.");
             }
 
-            _notes.Insert(0, new GroupNote
+            state.Notes.Insert(0, new GroupNote
             {
-                Id = _nextNoteId++,
+                Id = state.NextNoteId++,
                 Title = form.Title.Trim(),
                 Body = form.Body?.Trim() ?? string.Empty,
-                CreatedBy = NormalizeMember(form.CreatedBy),
+                CreatedBy = NormalizeMember(state, form.CreatedBy),
                 IsPinned = form.IsPinned,
                 CreatedOn = DateTime.Now
             });
@@ -125,16 +171,18 @@ public class SplitmateStore
     {
         lock (_gate)
         {
+            var state = ActiveGroup();
+
             if (string.IsNullOrWhiteSpace(form.Title))
             {
                 throw new InvalidOperationException("Task title is required.");
             }
 
-            _tasks.Insert(0, new GroupTask
+            state.Tasks.Insert(0, new GroupTask
             {
-                Id = _nextTaskId++,
+                Id = state.NextTaskId++,
                 Title = form.Title.Trim(),
-                AssignedTo = NormalizeMember(form.AssignedTo),
+                AssignedTo = NormalizeMember(state, form.AssignedTo),
                 DueDate = form.DueDate == default ? DateTime.Today.AddDays(3) : form.DueDate,
                 IsComplete = false
             });
@@ -145,7 +193,7 @@ public class SplitmateStore
     {
         lock (_gate)
         {
-            var task = _tasks.FirstOrDefault(item => item.Id == id);
+            var task = ActiveGroup().Tasks.FirstOrDefault(item => item.Id == id);
 
             if (task is not null)
             {
@@ -158,31 +206,35 @@ public class SplitmateStore
     {
         lock (_gate)
         {
-            _expenses.Clear();
-            _payments.Clear();
-            _notes.Clear();
-            _tasks.Clear();
-            _nextExpenseId = 1;
-            _nextPaymentId = 1;
-            _nextNoteId = 1;
-            _nextTaskId = 1;
+            _groups.Clear();
+            _activeGroupId = 0;
+            _nextGroupId = 1;
             SeedDemoData();
         }
     }
 
     private void SeedDemoData()
     {
-        _group.Id = 1;
-        _group.Name = "Splitmate Lakeshore House";
-        _group.Description = "A shared living group used for final-project expense splitting, payments, notes, and tasks.";
-        _group.CreatedOn = DateTime.Today.AddDays(-35);
-        _group.Members = new List<Member>
+        var state = new GroupState
         {
-            new() { Id = 1, Name = "Krishna", Email = "krishna@example.com", Role = "Group owner" },
-            new() { Id = 2, Name = "Aanya", Email = "aanya@example.com", Role = "Roommate" },
-            new() { Id = 3, Name = "Mateo", Email = "mateo@example.com", Role = "Roommate" },
-            new() { Id = 4, Name = "Priya", Email = "priya@example.com", Role = "Roommate" }
+            Group = new SplitmateGroup
+            {
+                Id = _nextGroupId++,
+                Name = "Splitmate Lakeshore House",
+                Description = "A shared living group used for final-project expense splitting, payments, notes, and tasks.",
+                CreatedOn = DateTime.Today.AddDays(-35),
+                Members = new List<Member>
+                {
+                    new() { Id = 1, Name = "Krishna", Email = "krishna@example.com", Role = "Group owner" },
+                    new() { Id = 2, Name = "Aanya", Email = "aanya@example.com", Role = "Roommate" },
+                    new() { Id = 3, Name = "Mateo", Email = "mateo@example.com", Role = "Roommate" },
+                    new() { Id = 4, Name = "Priya", Email = "priya@example.com", Role = "Roommate" }
+                }
+            }
         };
+
+        _groups.Add(state);
+        _activeGroupId = state.Group.Id;
 
         AddExpense(new ExpenseFormModel
         {
@@ -241,37 +293,80 @@ public class SplitmateStore
         });
     }
 
-    private List<SplitShare> BuildShares(decimal amount, string method, string shareInput)
+    private List<Member> ParseMembers(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            throw new InvalidOperationException("Add at least two group members.");
+        }
+
+        var lines = input.Split(new[] { '\r', '\n', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var members = new List<Member>();
+        var seenNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var line in lines)
+        {
+            var parts = line.Split('|', 2, StringSplitOptions.TrimEntries);
+            var name = parts[0].Trim();
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                continue;
+            }
+
+            if (!seenNames.Add(name))
+            {
+                throw new InvalidOperationException($"'{name}' was entered more than once.");
+            }
+
+            members.Add(new Member
+            {
+                Id = members.Count + 1,
+                Name = name,
+                Email = parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[1]) ? parts[1].Trim() : BuildEmail(name),
+                Role = members.Count == 0 ? "Group owner" : "Roommate"
+            });
+        }
+
+        if (members.Count < 2)
+        {
+            throw new InvalidOperationException("Create a group with at least two members.");
+        }
+
+        return members;
+    }
+
+    private List<SplitShare> BuildShares(GroupState state, decimal amount, string method, string shareInput)
     {
         return method switch
         {
-            "Equal" => BuildEqualShares(amount),
-            "Exact" => BuildExactShares(amount, shareInput),
-            "Percentage" => BuildPercentageShares(amount, shareInput),
+            "Equal" => BuildEqualShares(state, amount),
+            "Exact" => BuildExactShares(state, amount, shareInput),
+            "Percentage" => BuildPercentageShares(state, amount, shareInput),
             _ => throw new InvalidOperationException("Unsupported split method.")
         };
     }
 
-    private List<SplitShare> BuildEqualShares(decimal amount)
+    private List<SplitShare> BuildEqualShares(GroupState state, decimal amount)
     {
         var shares = new List<SplitShare>();
-        var baseShare = Money(amount / _group.Members.Count);
+        var baseShare = Money(amount / state.Group.Members.Count);
         var assigned = 0m;
 
-        for (var i = 0; i < _group.Members.Count; i++)
+        for (var i = 0; i < state.Group.Members.Count; i++)
         {
-            var share = i == _group.Members.Count - 1 ? Money(amount - assigned) : baseShare;
+            var share = i == state.Group.Members.Count - 1 ? Money(amount - assigned) : baseShare;
             assigned += share;
-            shares.Add(new SplitShare { MemberName = _group.Members[i].Name, Amount = share });
+            shares.Add(new SplitShare { MemberName = state.Group.Members[i].Name, Amount = share });
         }
 
         return shares;
     }
 
-    private List<SplitShare> BuildExactShares(decimal amount, string shareInput)
+    private List<SplitShare> BuildExactShares(GroupState state, decimal amount, string shareInput)
     {
-        var assignments = ParseAssignments(shareInput);
-        var shares = _group.Members
+        var assignments = ParseAssignments(state, shareInput);
+        var shares = state.Group.Members
             .Select(member => new SplitShare
             {
                 MemberName = member.Name,
@@ -288,9 +383,9 @@ public class SplitmateStore
         return shares;
     }
 
-    private List<SplitShare> BuildPercentageShares(decimal amount, string shareInput)
+    private List<SplitShare> BuildPercentageShares(GroupState state, decimal amount, string shareInput)
     {
-        var percentages = ParseAssignments(shareInput);
+        var percentages = ParseAssignments(state, shareInput);
         var percentTotal = percentages.Values.Sum();
 
         if (Math.Abs(percentTotal - 100m) > 0.01m)
@@ -298,8 +393,8 @@ public class SplitmateStore
             throw new InvalidOperationException($"Percentage shares must total 100%. Current total is {percentTotal:N2}%.");
         }
 
-        var assignedMembers = _group.Members.Where(member => percentages.ContainsKey(member.Name)).ToList();
-        var shares = _group.Members.Select(member => new SplitShare { MemberName = member.Name, Amount = 0m }).ToList();
+        var assignedMembers = state.Group.Members.Where(member => percentages.ContainsKey(member.Name)).ToList();
+        var shares = state.Group.Members.Select(member => new SplitShare { MemberName = member.Name, Amount = 0m }).ToList();
         var assignedAmount = 0m;
 
         for (var i = 0; i < assignedMembers.Count; i++)
@@ -316,7 +411,7 @@ public class SplitmateStore
         return shares;
     }
 
-    private Dictionary<string, decimal> ParseAssignments(string input)
+    private Dictionary<string, decimal> ParseAssignments(GroupState state, string input)
     {
         if (string.IsNullOrWhiteSpace(input))
         {
@@ -335,7 +430,7 @@ public class SplitmateStore
                 throw new InvalidOperationException("Use the format Member=Value for exact and percentage splits.");
             }
 
-            var memberName = NormalizeMember(parts[0]);
+            var memberName = NormalizeMember(state, parts[0]);
 
             if (!decimal.TryParse(parts[1], NumberStyles.Number, CultureInfo.InvariantCulture, out var value) || value < 0)
             {
@@ -348,15 +443,15 @@ public class SplitmateStore
         return assignments;
     }
 
-    private List<MemberBalance> BuildBalances()
+    private List<MemberBalance> BuildBalances(GroupState state)
     {
-        return _group.Members
+        return state.Group.Members
             .Select(member =>
             {
-                var paid = _expenses.Where(expense => expense.PaidBy == member.Name).Sum(expense => expense.Amount);
-                var share = _expenses.SelectMany(expense => expense.Shares).Where(split => split.MemberName == member.Name).Sum(split => split.Amount);
-                var paymentImpact = _payments.Where(payment => payment.FromMember == member.Name).Sum(payment => payment.Amount)
-                    - _payments.Where(payment => payment.ToMember == member.Name).Sum(payment => payment.Amount);
+                var paid = state.Expenses.Where(expense => expense.PaidBy == member.Name).Sum(expense => expense.Amount);
+                var share = state.Expenses.SelectMany(expense => expense.Shares).Where(split => split.MemberName == member.Name).Sum(split => split.Amount);
+                var paymentImpact = state.Payments.Where(payment => payment.FromMember == member.Name).Sum(payment => payment.Amount)
+                    - state.Payments.Where(payment => payment.ToMember == member.Name).Sum(payment => payment.Amount);
 
                 return new MemberBalance
                 {
@@ -371,9 +466,9 @@ public class SplitmateStore
             .ToList();
     }
 
-    private List<SettlementSuggestion> BuildSettlements()
+    private List<SettlementSuggestion> BuildSettlements(GroupState state)
     {
-        var balances = BuildBalances();
+        var balances = BuildBalances(state);
         var debtors = balances
             .Where(balance => balance.NetBalance < -0.01m)
             .Select(balance => new MemberBalance { MemberName = balance.MemberName, NetBalance = Math.Abs(balance.NetBalance) })
@@ -419,9 +514,19 @@ public class SplitmateStore
         return settlements;
     }
 
-    private string NormalizeMember(string value)
+    private GroupState ActiveGroup()
     {
-        var member = _group.Members.FirstOrDefault(item =>
+        if (_groups.Count == 0)
+        {
+            SeedDemoData();
+        }
+
+        return _groups.FirstOrDefault(group => group.Group.Id == _activeGroupId) ?? _groups[0];
+    }
+
+    private string NormalizeMember(GroupState state, string value)
+    {
+        var member = state.Group.Members.FirstOrDefault(item =>
             string.Equals(item.Name, value?.Trim(), StringComparison.OrdinalIgnoreCase)
             || string.Equals(item.Email, value?.Trim(), StringComparison.OrdinalIgnoreCase));
 
@@ -445,5 +550,24 @@ public class SplitmateStore
         return method;
     }
 
+    private static string BuildEmail(string name)
+    {
+        var localPart = new string(name.ToLowerInvariant().Where(char.IsLetterOrDigit).ToArray());
+        return $"{(string.IsNullOrWhiteSpace(localPart) ? "member" : localPart)}@example.com";
+    }
+
     private static decimal Money(decimal value) => Math.Round(value, 2, MidpointRounding.AwayFromZero);
+
+    private class GroupState
+    {
+        public SplitmateGroup Group { get; set; } = new();
+        public List<Expense> Expenses { get; } = new();
+        public List<Payment> Payments { get; } = new();
+        public List<GroupNote> Notes { get; } = new();
+        public List<GroupTask> Tasks { get; } = new();
+        public int NextExpenseId { get; set; } = 1;
+        public int NextPaymentId { get; set; } = 1;
+        public int NextNoteId { get; set; } = 1;
+        public int NextTaskId { get; set; } = 1;
+    }
 }

@@ -265,7 +265,8 @@ a {
 .method-list,
 .task-list,
 .note-grid,
-.demo-flow,
+.group-mini-list,
+.member-list,
 .screenshot-checklist {
   display: grid;
   gap: 12px;
@@ -276,7 +277,9 @@ a {
 .settlement-list div,
 .method-list div,
 .note-card,
-.task-row {
+.task-row,
+.member-list div,
+.group-mini-card {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbfdfd;
@@ -352,25 +355,17 @@ a {
   padding-top: 10px;
 }
 
-.demo-flow {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.group-mini-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.demo-flow a {
-  min-height: 78px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 14px;
-  color: var(--ink);
-  text-decoration: none;
-  font-weight: 800;
-  background: linear-gradient(180deg, #fff, #f7fbfb);
-}
-
-.demo-flow a:hover,
-.demo-flow a:focus {
+.group-mini-card.active,
+.group-card.active {
   border-color: var(--teal);
-  color: var(--teal-dark);
+  background: #edf6f5;
 }
 
 .reset-form {
@@ -483,6 +478,58 @@ a {
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
 
+.member-list div {
+  display: grid;
+  gap: 2px;
+}
+
+.member-list span,
+.member-list em {
+  color: var(--muted);
+  font-style: normal;
+}
+
+.group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.group-card {
+  display: flex;
+  min-height: 220px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdfd;
+  padding: 18px;
+}
+
+.group-card h3 {
+  margin: 6px 0 8px;
+  font-size: 1.25rem;
+  font-weight: 850;
+}
+
+.group-card p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.group-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.group-card-footer span {
+  color: var(--muted);
+  font-weight: 750;
+}
+
 .note-card small {
   color: var(--teal-dark);
   font-weight: 800;
@@ -564,7 +611,6 @@ a {
   }
 
   .hero-panel,
-  .demo-flow,
   .form-row {
     grid-template-columns: 1fr;
   }

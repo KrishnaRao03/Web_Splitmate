@@ -137,9 +137,21 @@ public class TaskFormModel
     public DateTime DueDate { get; set; } = DateTime.Today.AddDays(3);
 }
 
+public class CreateGroupFormModel
+{
+    [Required]
+    public string Name { get; set; } = string.Empty;
+
+    public string Description { get; set; } = string.Empty;
+
+    [Required]
+    public string MembersInput { get; set; } = string.Empty;
+}
+
 public class SplitmateDashboardViewModel
 {
     public SplitmateGroup Group { get; set; } = new();
+    public IReadOnlyList<SplitmateGroup> Groups { get; set; } = Array.Empty<SplitmateGroup>();
     public IReadOnlyList<Expense> Expenses { get; set; } = Array.Empty<Expense>();
     public IReadOnlyList<Payment> Payments { get; set; } = Array.Empty<Payment>();
     public IReadOnlyList<GroupNote> Notes { get; set; } = Array.Empty<GroupNote>();
@@ -147,6 +159,7 @@ public class SplitmateDashboardViewModel
     public IReadOnlyList<MemberBalance> Balances { get; set; } = Array.Empty<MemberBalance>();
     public IReadOnlyList<SettlementSuggestion> Settlements { get; set; } = Array.Empty<SettlementSuggestion>();
     public IReadOnlyList<string> SplitMethods { get; set; } = Array.Empty<string>();
+    public int ActiveGroupId { get; set; }
 
     public decimal TotalExpenses => Expenses.Sum(expense => expense.Amount);
     public decimal OutstandingTotal => Balances.Where(balance => balance.NetBalance < 0).Sum(balance => Math.Abs(balance.NetBalance));

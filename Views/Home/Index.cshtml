@@ -11,7 +11,7 @@
         <p>@Model.Group.Description</p>
         <div class="hero-actions">
             <a class="btn btn-primary" asp-controller="Home" asp-action="Expenses">Add expense</a>
-            <a class="btn btn-outline-primary" asp-controller="Home" asp-action="DemoGuide">Open demo guide</a>
+            <a class="btn btn-outline-primary" asp-controller="Home" asp-action="Groups">Create group</a>
         </div>
     </div>
     <div class="hero-panel" aria-label="Project summary">
@@ -20,8 +20,8 @@
             <strong>@Model.TotalExpenses.ToString("C")</strong>
         </div>
         <div>
-            <span class="metric-label">Members</span>
-            <strong>@Model.Group.Members.Count</strong>
+            <span class="metric-label">Groups</span>
+            <strong>@Model.Groups.Count</strong>
         </div>
         <div>
             <span class="metric-label">Open tasks</span>
@@ -109,15 +109,19 @@
     <article class="panel">
         <div class="section-heading">
             <div>
-                <span class="eyebrow">Demo flow</span>
-                <h2>What to show in the video</h2>
+                <span class="eyebrow">Feature 4</span>
+                <h2>Group management</h2>
             </div>
+            <a asp-controller="Home" asp-action="Groups">Manage groups</a>
         </div>
-        <div class="demo-flow">
-            <a asp-controller="Home" asp-action="Index">Dashboard summary</a>
-            <a asp-controller="Home" asp-action="Expenses">Equal, exact, and percentage splits</a>
-            <a asp-controller="Home" asp-action="Balances">Payments and settlement suggestions</a>
-            <a asp-controller="Home" asp-action="NotesTasks">Shared notes and task completion</a>
+        <div class="group-mini-list">
+            @foreach (var group in Model.Groups)
+            {
+                <div class="group-mini-card @(group.Id == Model.ActiveGroupId ? "active" : "")">
+                    <strong>@group.Name</strong>
+                    <span>@group.Members.Count members</span>
+                </div>
+            }
         </div>
     </article>
 </section>

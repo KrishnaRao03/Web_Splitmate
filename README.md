@@ -4,7 +4,8 @@ This is an ASP.NET Core MVC final project based on the feature set from the orig
 
 ## Main Features
 
-- Dashboard with total shared spend, group members, open tasks, outstanding balances, and recent activity
+- Dashboard with total shared spend, group count, open tasks, outstanding balances, and recent activity
+- Create groups with custom members and switch the active group
 - Add expenses using Equal, Exact, or Percentage split logic
 - Automatic member share validation and balance recalculation
 - Balance table showing amount paid, amount owed, payment impact, and net result
@@ -12,7 +13,6 @@ This is an ASP.NET Core MVC final project based on the feature set from the orig
 - Manual payment ledger
 - Group notes with pinned-note support
 - Group task board with due dates and completion status
-- Demo Guide page for the required video, screenshots, and GitHub checklist
 
 ## Technology Used
 
@@ -36,10 +36,10 @@ Final_Project/
   Views/
     Home/
       Index.cshtml
+      Groups.cshtml
       Expenses.cshtml
       Balances.cshtml
       NotesTasks.cshtml
-      DemoGuide.cshtml
   wwwroot/
     css/site.css
     js/site.js
@@ -69,18 +69,19 @@ Keep the video between 8 and 10 minutes.
 2. Show the Dashboard and describe the summary cards.
 3. Open the code and explain Models, Services, Controllers, and Views.
 4. Run the app.
-5. Add an expense with Equal split.
-6. Add an expense with Exact or Percentage split.
-7. Open Balances and show recalculated balances plus settlement suggestions.
-8. Record a payment and show the payment ledger.
-9. Add a note, add a task, and complete a task.
-10. Show this README, screenshots folder, and GitHub repository page.
+5. Create a new group from the Groups page and show that it becomes active.
+6. Add an expense with Equal split.
+7. Add an expense with Exact or Percentage split.
+8. Open Balances and show recalculated balances plus settlement suggestions.
+9. Record a payment and show the payment ledger.
+10. Add a note, add a task, and complete a task.
 
 ## Screenshot Checklist
 
 Save screenshots in the `screenshots` folder before uploading them to Blackboard.
 
 - Dashboard summary
+- Groups page with create-group form and saved group cards
 - Expense form and expense ledger
 - Balance table and settlement suggestions
 - Payment ledger after recording a payment
