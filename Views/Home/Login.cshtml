@@ -1,0 +1,47 @@
+@model LoginFormModel
+
+@{
+    ViewData["Title"] = "Login";
+    var demoUsers = ViewBag.DemoUsers as IReadOnlyList<UserAccount> ?? Array.Empty<UserAccount>();
+}
+
+<section class="login-shell">
+    <article class="login-card">
+        <div>
+            <span class="eyebrow">Splitmate access</span>
+            <h1>Login</h1>
+            <p>Use the admin account to manage groups, or use the member account to test regular user access.</p>
+        </div>
+        <form asp-controller="Home" asp-action="Login" method="post" class="stacked-form">
+            <input type="hidden" asp-for="ReturnUrl" />
+            <label>
+                Email
+                <input asp-for="Email" class="form-control" autocomplete="username" required />
+            </label>
+            <label>
+                Password
+                <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" required />
+            </label>
+            <label class="check-line">
+                <input asp-for="RememberMe" />
+                Keep me logged in
+            </label>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+    </article>
+
+    <aside class="panel account-panel">
+        <span class="eyebrow">Demo accounts</span>
+        <h2>Use these in the video</h2>
+        <div class="account-list">
+            @foreach (var user in demoUsers)
+            {
+                <div>
+                    <strong>@user.Role</strong>
+                    <span>@user.Email</span>
+                    <code>@user.Password</code>
+                </div>
+            }
+        </div>
+    </aside>
+</section>

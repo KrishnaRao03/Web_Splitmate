@@ -148,6 +148,37 @@ public class CreateGroupFormModel
     public string MembersInput { get; set; } = string.Empty;
 }
 
+public class EditGroupFormModel
+{
+    public int Id { get; set; }
+
+    [Required]
+    public string Name { get; set; } = string.Empty;
+
+    public string Description { get; set; } = string.Empty;
+}
+
+public class LoginFormModel
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+
+    [Required]
+    public string Password { get; set; } = string.Empty;
+
+    public bool RememberMe { get; set; }
+    public string ReturnUrl { get; set; } = "/";
+}
+
+public class UserAccount
+{
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
+}
+
 public class SplitmateDashboardViewModel
 {
     public SplitmateGroup Group { get; set; } = new();

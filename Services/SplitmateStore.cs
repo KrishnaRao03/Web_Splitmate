@@ -81,6 +81,52 @@ public class SplitmateStore
         }
     }
 
+    public void UpdateGroup(EditGroupFormModel form)
+    {
+        lock (_gate)
+        {
+            if (string.IsNullOrWhiteSpace(form.Name))
+            {
+                throw new InvalidOperationException("Group name is required.");
+            }
+
+            var state = _groups.FirstOrDefault(group => group.Group.Id == form.Id);
+            if (state is null)
+            {
+                throw new InvalidOperationException("That group could not be found.");
+            }
+
+            state.Group.Name = form.Name.Trim();
+            state.Group.Description = string.IsNullOrWhiteSpace(form.Description)
+                ? "A Splitmate group for shared expenses, notes, tasks, and payments."
+                : form.Description.Trim();
+        }
+    }
+
+    public void DeleteGroup(int id)
+    {
+        lock (_gate)
+        {
+            if (_groups.Count == 1)
+            {
+                throw new InvalidOperationException("At least one group must remain in the app.");
+            }
+
+            var state = _groups.FirstOrDefault(group => group.Group.Id == id);
+            if (state is null)
+            {
+                throw new InvalidOperationException("That group could not be found.");
+            }
+
+            _groups.Remove(state);
+
+            if (_activeGroupId == id)
+            {
+                _activeGroupId = _groups[0].Group.Id;
+            }
+        }
+    }
+
     public void AddExpense(ExpenseFormModel form)
     {
         lock (_gate)

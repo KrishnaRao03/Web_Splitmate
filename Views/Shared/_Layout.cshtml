@@ -21,23 +21,42 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse" id="mainNav">
-                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Index">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Groups">Groups</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Expenses">Expenses</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Balances">Balances</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="NotesTasks">Notes & Tasks</a>
-                        </li>
-                    </ul>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Index">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Groups">Groups</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Expenses">Expenses</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Balances">Balances</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="NotesTasks">Notes & Tasks</a>
+                            </li>
+                            <li class="nav-item">
+                                <span class="user-pill">@User.Identity.Name (@(User.IsInRole("Admin") ? "Admin" : "Member"))</span>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="Home" asp-action="Logout" method="post">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item">
+                                <a class="nav-link nav-pill" asp-controller="Home" asp-action="Login">Login</a>
+                            </li>
+                        </ul>
+                    }
                 </div>
             </div>
         </nav>
@@ -59,7 +78,7 @@
     <footer class="footer">
         <div class="container">
             <span>Splitmate Final Project</span>
-            <span>ASP.NET Core MVC demo based on the original Splitmate functions.</span>
+            <span>ASP.NET Core MVC demo with login, admin group management, and Splitmate features.</span>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

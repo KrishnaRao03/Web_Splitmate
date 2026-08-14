@@ -65,6 +65,18 @@ a {
   background: var(--soft);
 }
 
+.user-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  background: #edf6f5;
+  color: var(--teal-dark);
+  font-weight: 800;
+}
+
 .page-shell {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
@@ -83,14 +95,68 @@ a {
   margin-bottom: 24px;
 }
 
+.login-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(320px, 0.55fr);
+  gap: 24px;
+  align-items: start;
+  min-height: calc(100vh - 190px);
+  padding-top: 48px;
+}
+
 .hero-copy,
 .hero-panel,
 .panel,
+.login-card,
 .progress-card {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: 0 18px 45px rgba(23, 32, 42, 0.06);
+}
+
+.login-card {
+  display: grid;
+  gap: 24px;
+  padding: 36px;
+}
+
+.login-card h1,
+.access-panel h1 {
+  margin: 6px 0 12px;
+  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  font-weight: 850;
+}
+
+.login-card p,
+.access-panel p {
+  color: var(--muted);
+  max-width: 620px;
+}
+
+.account-panel h2 {
+  margin: 6px 0 16px;
+  font-size: 1.35rem;
+  font-weight: 850;
+}
+
+.account-list {
+  display: grid;
+  gap: 12px;
+}
+
+.account-list div {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdfd;
+  padding: 14px;
+}
+
+.account-list span,
+.account-list code {
+  color: var(--muted);
 }
 
 .hero-copy {
@@ -157,6 +223,18 @@ a {
 .btn-outline-primary:focus {
   background: var(--teal);
   border-color: var(--teal);
+}
+
+.btn-outline-danger {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.btn-outline-danger:hover,
+.btn-outline-danger:focus {
+  color: #fff;
+  background: var(--danger);
+  border-color: var(--danger);
 }
 
 .hero-panel {
@@ -507,6 +585,22 @@ a {
   padding: 18px;
 }
 
+.admin-lock {
+  display: grid;
+  align-content: center;
+  min-height: 360px;
+}
+
+.admin-lock h2 {
+  margin: 6px 0 10px;
+  font-weight: 850;
+}
+
+.admin-lock p {
+  color: var(--muted);
+  max-width: 540px;
+}
+
 .group-card h3 {
   margin: 6px 0 8px;
   font-size: 1.25rem;
@@ -525,9 +619,36 @@ a {
   gap: 12px;
 }
 
+.group-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.group-edit-form {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.group-edit-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--ink);
+  font-weight: 750;
+}
+
 .group-card-footer span {
   color: var(--muted);
   font-weight: 750;
+}
+
+.access-panel {
+  max-width: 760px;
+  margin: 56px auto;
 }
 
 .note-card small {
@@ -588,6 +709,7 @@ a {
 
 @media (max-width: 900px) {
   .dashboard-hero,
+  .login-shell,
   .two-col,
   .form-layout {
     grid-template-columns: 1fr;

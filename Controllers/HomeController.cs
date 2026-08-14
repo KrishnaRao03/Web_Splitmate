@@ -1,17 +1,85 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using Final_Project.Models;
 using Final_Project.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Final_Project.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly SplitmateStore _store;
+    private readonly UserStore _users;
 
-    public HomeController(SplitmateStore store)
+    public HomeController(SplitmateStore store, UserStore users)
     {
         _store = store;
+        _users = users;
+    }
+
+    [AllowAnonymous]
+    public IActionResult Login(string? returnUrl = null)
+    {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
+        ViewBag.DemoUsers = _users.DemoUsers;
+        return View(new LoginFormModel { ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl });
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Login(LoginFormModel form)
+    {
+        ViewBag.DemoUsers = _users.DemoUsers;
+
+        var user = _users.Validate(form.Email, form.Password);
+        if (user is null)
+        {
+            TempData["ErrorMessage"] = "Invalid email or password.";
+            return View(form);
+        }
+
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.Name, user.Name),
+            new(ClaimTypes.Email, user.Email),
+            new(ClaimTypes.Role, user.Role)
+        };
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal,
+            new AuthenticationProperties { IsPersistent = form.RememberMe });
+
+        if (!string.IsNullOrWhiteSpace(form.ReturnUrl) && Url.IsLocalUrl(form.ReturnUrl))
+        {
+            return Redirect(form.ReturnUrl);
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return RedirectToAction(nameof(Login));
+    }
+
+    public IActionResult AccessDenied()
+    {
+        return View();
     }
 
     public IActionResult Index()
@@ -40,10 +108,29 @@ public class HomeController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public IActionResult CreateGroup(CreateGroupFormModel form)
     {
         TrySave(() => _store.CreateGroup(form), "Group created and selected.");
+        return RedirectToAction(nameof(Groups));
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public IActionResult EditGroup(EditGroupFormModel form)
+    {
+        TrySave(() => _store.UpdateGroup(form), "Group details updated.");
+        return RedirectToAction(nameof(Groups));
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public IActionResult DeleteGroup(int id)
+    {
+        TrySave(() => _store.DeleteGroup(id), "Group deleted.");
         return RedirectToAction(nameof(Groups));
     }
 
@@ -97,6 +184,7 @@ public class HomeController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public IActionResult ResetDemo()
     {

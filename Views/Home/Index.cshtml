@@ -126,6 +126,9 @@
     </article>
 </section>
 
-<form asp-controller="Home" asp-action="ResetDemo" method="post" class="reset-form">
-    <button type="submit" class="btn btn-sm btn-outline-secondary">Reset demo data</button>
-</form>
+@if (User.IsInRole("Admin"))
+{
+    <form asp-controller="Home" asp-action="ResetDemo" method="post" class="reset-form">
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Reset demo data</button>
+    </form>
+}

@@ -2,13 +2,14 @@
 
 @{
     ViewData["Title"] = "Groups";
+    var isAdmin = User.IsInRole("Admin");
 }
 
 <section class="page-header">
     <div>
         <span class="eyebrow">Splitmate feature</span>
         <h1>Create and switch groups</h1>
-        <p>Build a shared expense group with members, then track that group separately across expenses, balances, payments, notes, and tasks.</p>
+        <p>Admins can create, edit, and delete groups. Members can view groups and switch the active workspace.</p>
     </div>
     <div class="progress-card">
         <strong>@Model.Groups.Count</strong>
@@ -18,28 +19,39 @@
 
 <section class="content-grid form-layout">
     <article class="panel">
-        <div class="section-heading">
-            <div>
-                <span class="eyebrow">Create</span>
-                <h2>New group</h2>
+        @if (isAdmin)
+        {
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">Admin only</span>
+                    <h2>New group</h2>
+                </div>
             </div>
-        </div>
-        <form asp-controller="Home" asp-action="CreateGroup" method="post" class="stacked-form">
-            <label>
-                Group name
-                <input name="Name" class="form-control" placeholder="Apartment 402, Road Trip, Study Team..." required />
-            </label>
-            <label>
-                Description
-                <textarea name="Description" class="form-control" rows="3" placeholder="What this group is used for"></textarea>
-            </label>
-            <label>
-                Members
-                <textarea name="MembersInput" class="form-control" rows="5" placeholder="Krishna | krishna@example.com&#10;Aanya | aanya@example.com&#10;Mateo | mateo@example.com" required></textarea>
-                <span class="form-hint">Enter one member per line. Email is optional, but use Name | email when you have it.</span>
-            </label>
-            <button type="submit" class="btn btn-primary">Create group</button>
-        </form>
+            <form asp-controller="Home" asp-action="CreateGroup" method="post" class="stacked-form">
+                <label>
+                    Group name
+                    <input name="Name" class="form-control" placeholder="Apartment 402, Road Trip, Study Team..." required />
+                </label>
+                <label>
+                    Description
+                    <textarea name="Description" class="form-control" rows="3" placeholder="What this group is used for"></textarea>
+                </label>
+                <label>
+                    Members
+                    <textarea name="MembersInput" class="form-control" rows="5" placeholder="Krishna | krishna@example.com&#10;Aanya | aanya@example.com&#10;Mateo | mateo@example.com" required></textarea>
+                    <span class="form-hint">Enter one member per line. Email is optional, but use Name | email when you have it.</span>
+                </label>
+                <button type="submit" class="btn btn-primary">Create group</button>
+            </form>
+        }
+        else
+        {
+            <div class="admin-lock">
+                <span class="eyebrow">Member access</span>
+                <h2>Group management is admin-only</h2>
+                <p>You can view groups and switch the active group, but only an admin can create, edit, or delete groups.</p>
+            </div>
+        }
     </article>
 
     <article class="panel">
@@ -80,19 +92,46 @@
                     <h3>@group.Name</h3>
                     <p>@group.Description</p>
                 </div>
+
+                @if (isAdmin)
+                {
+                    <form asp-controller="Home" asp-action="EditGroup" method="post" class="group-edit-form">
+                        <input type="hidden" name="Id" value="@group.Id" />
+                        <label>
+                            Group name
+                            <input name="Name" class="form-control" value="@group.Name" required />
+                        </label>
+                        <label>
+                            Description
+                            <textarea name="Description" class="form-control" rows="3">@group.Description</textarea>
+                        </label>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Save changes</button>
+                    </form>
+                }
+
                 <div class="group-card-footer">
                     <span>@group.Members.Count members</span>
-                    @if (group.Id == Model.ActiveGroupId)
-                    {
-                        <strong>Active</strong>
-                    }
-                    else
-                    {
-                        <form asp-controller="Home" asp-action="SelectGroup" method="post">
-                            <input type="hidden" name="id" value="@group.Id" />
-                            <button type="submit" class="btn btn-sm btn-outline-primary">Select</button>
-                        </form>
-                    }
+                    <div class="group-actions">
+                        @if (group.Id == Model.ActiveGroupId)
+                        {
+                            <strong>Active</strong>
+                        }
+                        else
+                        {
+                            <form asp-controller="Home" asp-action="SelectGroup" method="post">
+                                <input type="hidden" name="id" value="@group.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Select</button>
+                            </form>
+                        }
+
+                        @if (isAdmin)
+                        {
+                            <form asp-controller="Home" asp-action="DeleteGroup" method="post">
+                                <input type="hidden" name="id" value="@group.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        }
+                    </div>
                 </div>
             </article>
         }
