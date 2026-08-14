@@ -1,0 +1,112 @@
+@model SplitmateDashboardViewModel
+
+@{
+    ViewData["Title"] = "Demo Guide";
+}
+
+<section class="page-header">
+    <div>
+        <span class="eyebrow">Submission support</span>
+        <h1>Video, screenshots, and GitHub checklist</h1>
+        <p>Use this page while recording the required 8-10 minute demo and collecting Blackboard screenshots.</p>
+    </div>
+</section>
+
+<section class="content-grid two-col">
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">8-10 minute video</span>
+                <h2>Suggested recording flow</h2>
+            </div>
+        </div>
+        <ol class="demo-steps">
+            <li><strong>Project intro:</strong> explain that this ASP.NET Core MVC app ports the core Splitmate functions.</li>
+            <li><strong>Dashboard:</strong> show total expenses, members, balances, recent expenses, and task progress.</li>
+            <li><strong>Code:</strong> open Models, Services, Controllers, and Views to explain MVC separation.</li>
+            <li><strong>Run:</strong> start the app, add an equal expense, then add exact or percentage shares.</li>
+            <li><strong>Balances:</strong> show recalculated balances, settlement suggestions, and record a payment.</li>
+            <li><strong>Notes & Tasks:</strong> add a note, add a task, and complete a task.</li>
+            <li><strong>Wrap up:</strong> show the README, screenshot folder, and GitHub repository page.</li>
+        </ol>
+    </article>
+
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Screenshots</span>
+                <h2>Blackboard checklist</h2>
+            </div>
+        </div>
+        <div class="screenshot-checklist" data-checklist>
+            <label><input type="checkbox" /> Dashboard summary</label>
+            <label><input type="checkbox" /> Expense form and expense ledger</label>
+            <label><input type="checkbox" /> Balance table and settlement suggestions</label>
+            <label><input type="checkbox" /> Payment ledger after recording a payment</label>
+            <label><input type="checkbox" /> Notes and tasks board</label>
+            <label><input type="checkbox" /> GitHub repository page with project files</label>
+        </div>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">Source mapping</span>
+            <h2>Splitmate functions used in this final project</h2>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table app-table align-middle">
+            <thead>
+                <tr>
+                    <th>Original Splitmate function</th>
+                    <th>Final Project implementation</th>
+                    <th>Where to show it</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Group-based expense splitting</td>
+                    <td>Seeded group with four members and live expense form</td>
+                    <td>Dashboard and Expenses pages</td>
+                </tr>
+                <tr>
+                    <td>Equal, exact, and percentage split logic</td>
+                    <td>SplitmateStore validates and calculates shares for each method</td>
+                    <td>Expenses page and Services code</td>
+                </tr>
+                <tr>
+                    <td>Balance overview</td>
+                    <td>Paid amount, share amount, payments, and net balance calculations</td>
+                    <td>Balances page</td>
+                </tr>
+                <tr>
+                    <td>Payment ledger</td>
+                    <td>Manual settlement form and transaction history</td>
+                    <td>Balances page</td>
+                </tr>
+                <tr>
+                    <td>Group notes and tasks</td>
+                    <td>Note form, task form, completion status, and progress tracking</td>
+                    <td>Notes & Tasks page</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">GitHub</span>
+            <h2>Repository commands</h2>
+        </div>
+    </div>
+    <pre class="command-block"><code>git init
+git add .
+git commit -m "Add Splitmate final project"
+git branch -M main
+git remote add origin https://github.com/YOUR-USERNAME/splitmate-final-project.git
+git push -u origin main</code></pre>
+</section>

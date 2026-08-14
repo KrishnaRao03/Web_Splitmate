@@ -1,0 +1,134 @@
+@model SplitmateDashboardViewModel
+
+@{
+    ViewData["Title"] = "Notes & Tasks";
+}
+
+<section class="page-header">
+    <div>
+        <span class="eyebrow">Splitmate feature</span>
+        <h1>Group notes and tasks</h1>
+        <p>Keep roommate notes, chores, and due dates connected to the shared expense group.</p>
+    </div>
+    <div class="progress-card">
+        <strong>@Model.ProgressPercent%</strong>
+        <span>task completion</span>
+    </div>
+</section>
+
+<section class="content-grid two-col">
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Notes</span>
+                <h2>Add group note</h2>
+            </div>
+        </div>
+        <form asp-controller="Home" asp-action="AddNote" method="post" class="stacked-form">
+            <label>
+                Title
+                <input name="Title" class="form-control" required />
+            </label>
+            <label>
+                Created by
+                <select name="CreatedBy" class="form-select">
+                    @foreach (var member in Model.Group.Members)
+                    {
+                        <option value="@member.Name">@member.Name</option>
+                    }
+                </select>
+            </label>
+            <label>
+                Details
+                <textarea name="Body" class="form-control" rows="3"></textarea>
+            </label>
+            <label class="check-line">
+                <input name="IsPinned" value="true" type="checkbox" />
+                Pin this note
+            </label>
+            <button type="submit" class="btn btn-primary">Save note</button>
+        </form>
+    </article>
+
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Tasks</span>
+                <h2>Add task</h2>
+            </div>
+        </div>
+        <form asp-controller="Home" asp-action="AddTask" method="post" class="stacked-form">
+            <label>
+                Task title
+                <input name="Title" class="form-control" required />
+            </label>
+            <div class="form-row">
+                <label>
+                    Assigned to
+                    <select name="AssignedTo" class="form-select">
+                        @foreach (var member in Model.Group.Members)
+                        {
+                            <option value="@member.Name">@member.Name</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    Due date
+                    <input name="DueDate" type="date" class="form-control" value="@DateTime.Today.AddDays(3).ToString("yyyy-MM-dd")" />
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary">Save task</button>
+        </form>
+    </article>
+</section>
+
+<section class="content-grid two-col">
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Board</span>
+                <h2>Current notes</h2>
+            </div>
+        </div>
+        <div class="note-grid">
+            @foreach (var note in Model.Notes)
+            {
+                <div class="note-card">
+                    <div class="note-topline">
+                        <strong>@note.Title</strong>
+                        @if (note.IsPinned)
+                        {
+                            <span>Pinned</span>
+                        }
+                    </div>
+                    <p>@note.Body</p>
+                    <small>@note.CreatedBy - @note.CreatedOn.ToString("MMM d")</small>
+                </div>
+            }
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Board</span>
+                <h2>Task list</h2>
+            </div>
+        </div>
+        <div class="task-list">
+            @foreach (var task in Model.Tasks)
+            {
+                <form asp-controller="Home" asp-action="CompleteTask" method="post" class="task-row @(task.IsComplete ? "complete" : "")">
+                    <input type="hidden" name="id" value="@task.Id" />
+                    <div>
+                        <strong>@task.Title</strong>
+                        <span>@task.AssignedTo - due @task.DueDate.ToString("MMM d")</span>
+                    </div>
+                    <button type="submit" class="btn btn-sm @(task.IsComplete ? "btn-outline-secondary" : "btn-outline-primary")">
+                        @(task.IsComplete ? "Reopen" : "Complete")
+                    </button>
+                </form>
+            }
+        </div>
+    </article>
+</section>

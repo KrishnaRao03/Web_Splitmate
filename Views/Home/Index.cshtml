@@ -1,0 +1,127 @@
+@model SplitmateDashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<section class="dashboard-hero">
+    <div class="hero-copy">
+        <img src="~/images/splitmate-logo-transparent.png" alt="Splitmate logo" class="hero-logo" />
+        <h1>@Model.Group.Name</h1>
+        <p>@Model.Group.Description</p>
+        <div class="hero-actions">
+            <a class="btn btn-primary" asp-controller="Home" asp-action="Expenses">Add expense</a>
+            <a class="btn btn-outline-primary" asp-controller="Home" asp-action="DemoGuide">Open demo guide</a>
+        </div>
+    </div>
+    <div class="hero-panel" aria-label="Project summary">
+        <div>
+            <span class="metric-label">Total shared spend</span>
+            <strong>@Model.TotalExpenses.ToString("C")</strong>
+        </div>
+        <div>
+            <span class="metric-label">Members</span>
+            <strong>@Model.Group.Members.Count</strong>
+        </div>
+        <div>
+            <span class="metric-label">Open tasks</span>
+            <strong>@Model.OpenTaskCount</strong>
+        </div>
+        <div>
+            <span class="metric-label">Outstanding</span>
+            <strong>@Model.OutstandingTotal.ToString("C")</strong>
+        </div>
+    </div>
+</section>
+
+<section class="content-grid two-col">
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Feature 1</span>
+                <h2>Balance overview</h2>
+            </div>
+            <a asp-controller="Home" asp-action="Balances">View payments</a>
+        </div>
+        <div class="balance-list">
+            @foreach (var balance in Model.Balances)
+            {
+                <div class="balance-row">
+                    <div>
+                        <strong>@balance.MemberName</strong>
+                        <span>@balance.Status</span>
+                    </div>
+                    <strong class="@(balance.NetBalance >= 0 ? "positive" : "negative")">@balance.NetBalance.ToString("C")</strong>
+                </div>
+            }
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Feature 2</span>
+                <h2>Recent expenses</h2>
+            </div>
+            <a asp-controller="Home" asp-action="Expenses">History</a>
+        </div>
+        <div class="timeline">
+            @foreach (var expense in Model.Expenses.Take(4))
+            {
+                <div class="timeline-item">
+                    <span>@expense.CreatedOn.ToString("MMM d")</span>
+                    <div>
+                        <strong>@expense.Description</strong>
+                        <p>@expense.PaidBy paid @expense.Amount.ToString("C") using @expense.SplitMethod split.</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </article>
+</section>
+
+<section class="content-grid two-col">
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Feature 3</span>
+                <h2>Notes and tasks</h2>
+            </div>
+            <a asp-controller="Home" asp-action="NotesTasks">Open board</a>
+        </div>
+        <div class="progress-block">
+            <div class="progress-value">@Model.ProgressPercent%</div>
+            <div class="progress flex-grow-1" role="progressbar" aria-label="Task completion" aria-valuenow="@Model.ProgressPercent" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar" style="width: @Model.ProgressPercent%"></div>
+            </div>
+        </div>
+        <ul class="clean-list">
+            @foreach (var task in Model.Tasks.Take(3))
+            {
+                <li>
+                    <span>@task.Title</span>
+                    <strong>@(task.IsComplete ? "Done" : task.DueDate.ToString("MMM d"))</strong>
+                </li>
+            }
+        </ul>
+    </article>
+
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Demo flow</span>
+                <h2>What to show in the video</h2>
+            </div>
+        </div>
+        <div class="demo-flow">
+            <a asp-controller="Home" asp-action="Index">Dashboard summary</a>
+            <a asp-controller="Home" asp-action="Expenses">Equal, exact, and percentage splits</a>
+            <a asp-controller="Home" asp-action="Balances">Payments and settlement suggestions</a>
+            <a asp-controller="Home" asp-action="NotesTasks">Shared notes and task completion</a>
+        </div>
+    </article>
+</section>
+
+<form asp-controller="Home" asp-action="ResetDemo" method="post" class="reset-form">
+    <button type="submit" class="btn btn-sm btn-outline-secondary">Reset demo data</button>
+</form>

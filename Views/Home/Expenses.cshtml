@@ -1,0 +1,133 @@
+@model SplitmateDashboardViewModel
+
+@{
+    ViewData["Title"] = "Expenses";
+}
+
+<section class="page-header">
+    <div>
+        <span class="eyebrow">Splitmate feature</span>
+        <h1>Expense splitting</h1>
+        <p>Add shared costs and split them equally, by exact amount, or by percentage.</p>
+    </div>
+    <div class="member-strip">
+        @foreach (var member in Model.Group.Members)
+        {
+            <span>@member.Name</span>
+        }
+    </div>
+</section>
+
+<section class="content-grid form-layout">
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Create</span>
+                <h2>Add a new expense</h2>
+            </div>
+        </div>
+        <form asp-controller="Home" asp-action="AddExpense" method="post" class="stacked-form">
+            <label>
+                Description
+                <input name="Description" class="form-control" placeholder="Dinner, groceries, rent..." required />
+            </label>
+            <div class="form-row">
+                <label>
+                    Amount
+                    <input name="Amount" class="form-control" type="number" min="0.01" step="0.01" placeholder="85.50" required />
+                </label>
+                <label>
+                    Paid by
+                    <select name="PaidBy" class="form-select" required>
+                        @foreach (var member in Model.Group.Members)
+                        {
+                            <option value="@member.Name">@member.Name</option>
+                        }
+                    </select>
+                </label>
+            </div>
+            <label>
+                Split method
+                <select name="SplitMethod" class="form-select" data-split-method>
+                    @foreach (var method in Model.SplitMethods)
+                    {
+                        <option value="@method">@method</option>
+                    }
+                </select>
+            </label>
+            <label>
+                Shares for exact or percentage split
+                <textarea name="ShareInput" class="form-control" data-share-input rows="3" placeholder="Krishna=25, Aanya=25, Mateo=25, Priya=25"></textarea>
+                <span class="form-hint" data-share-hint>Equal split does not need custom shares.</span>
+            </label>
+            <button type="submit" class="btn btn-primary">Save expense</button>
+        </form>
+    </article>
+
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">How it works</span>
+                <h2>Split methods</h2>
+            </div>
+        </div>
+        <div class="method-list">
+            <div>
+                <strong>Equal</strong>
+                <p>The amount is divided evenly across all group members.</p>
+            </div>
+            <div>
+                <strong>Exact</strong>
+                <p>Enter each member's dollar amount, and the app validates that the total matches the bill.</p>
+            </div>
+            <div>
+                <strong>Percentage</strong>
+                <p>Enter percentages by member, and the app validates that the total equals 100%.</p>
+            </div>
+        </div>
+    </article>
+</section>
+
+<section class="panel">
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">History</span>
+            <h2>Expense ledger</h2>
+        </div>
+        <strong>@Model.TotalExpenses.ToString("C") total</strong>
+    </div>
+    <div class="table-responsive">
+        <table class="table app-table align-middle">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Paid by</th>
+                    <th>Method</th>
+                    <th class="text-end">Amount</th>
+                    <th>Member shares</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var expense in Model.Expenses)
+                {
+                    <tr>
+                        <td>@expense.CreatedOn.ToString("MMM d")</td>
+                        <td><strong>@expense.Description</strong></td>
+                        <td>@expense.PaidBy</td>
+                        <td><span class="status-chip">@expense.SplitMethod</span></td>
+                        <td class="text-end">@expense.Amount.ToString("C")</td>
+                        <td>
+                            <div class="share-grid">
+                                @foreach (var share in expense.Shares)
+                                {
+                                    <span>@share.MemberName: @share.Amount.ToString("C")</span>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

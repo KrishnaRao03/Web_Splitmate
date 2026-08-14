@@ -1,0 +1,139 @@
+@model SplitmateDashboardViewModel
+
+@{
+    ViewData["Title"] = "Balances";
+}
+
+<section class="page-header">
+    <div>
+        <span class="eyebrow">Splitmate feature</span>
+        <h1>Balances and payments</h1>
+        <p>See who owes money, who should get paid back, and record payment settlements.</p>
+    </div>
+</section>
+
+<section class="content-grid two-col">
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Balances</span>
+                <h2>Member overview</h2>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table app-table align-middle">
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th class="text-end">Paid</th>
+                        <th class="text-end">Share</th>
+                        <th class="text-end">Payments</th>
+                        <th class="text-end">Net</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var balance in Model.Balances)
+                    {
+                        <tr>
+                            <td><strong>@balance.MemberName</strong></td>
+                            <td class="text-end">@balance.TotalPaid.ToString("C")</td>
+                            <td class="text-end">@balance.TotalShare.ToString("C")</td>
+                            <td class="text-end">@balance.PaymentImpact.ToString("C")</td>
+                            <td class="text-end @(balance.NetBalance >= 0 ? "positive" : "negative")">@balance.NetBalance.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Settle</span>
+                <h2>Record a payment</h2>
+            </div>
+        </div>
+        <form asp-controller="Home" asp-action="RecordPayment" method="post" class="stacked-form">
+            <div class="form-row">
+                <label>
+                    From
+                    <select name="FromMember" class="form-select" required>
+                        @foreach (var member in Model.Group.Members)
+                        {
+                            <option value="@member.Name">@member.Name</option>
+                        }
+                    </select>
+                </label>
+                <label>
+                    To
+                    <select name="ToMember" class="form-select" required>
+                        @foreach (var member in Model.Group.Members)
+                        {
+                            <option value="@member.Name">@member.Name</option>
+                        }
+                    </select>
+                </label>
+            </div>
+            <label>
+                Amount
+                <input name="Amount" type="number" min="0.01" step="0.01" class="form-control" required />
+            </label>
+            <label>
+                Note
+                <input name="Note" class="form-control" placeholder="E-transfer, cash, Stripe payment..." />
+            </label>
+            <button type="submit" class="btn btn-primary">Record payment</button>
+        </form>
+    </article>
+</section>
+
+<section class="content-grid two-col">
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Suggestions</span>
+                <h2>Settlement plan</h2>
+            </div>
+        </div>
+        @if (Model.Settlements.Any())
+        {
+            <div class="settlement-list">
+                @foreach (var settlement in Model.Settlements)
+                {
+                    <div>
+                        <strong>@settlement.FromMember</strong>
+                        <span>pays</span>
+                        <strong>@settlement.ToMember</strong>
+                        <em>@settlement.Amount.ToString("C")</em>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="empty-state">All balances are settled.</p>
+        }
+    </article>
+
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">Ledger</span>
+                <h2>Payment history</h2>
+            </div>
+        </div>
+        <div class="timeline">
+            @foreach (var payment in Model.Payments)
+            {
+                <div class="timeline-item">
+                    <span>@payment.PaidOn.ToString("MMM d")</span>
+                    <div>
+                        <strong>@payment.FromMember paid @payment.ToMember @payment.Amount.ToString("C")</strong>
+                        <p>@(string.IsNullOrWhiteSpace(payment.Note) ? "Manual settlement" : payment.Note)</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </article>
+</section>
