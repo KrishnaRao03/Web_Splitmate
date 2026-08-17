@@ -135,6 +135,33 @@ public class HomeController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public IActionResult AddMember(AddMemberFormModel form)
+    {
+        TrySave(() => _store.AddMember(form), "Member added to the group.");
+        return RedirectToAction(nameof(Groups));
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public IActionResult EditMember(EditMemberFormModel form)
+    {
+        TrySave(() => _store.UpdateMember(form), "Member details updated.");
+        return RedirectToAction(nameof(Groups));
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public IActionResult DeleteMember(int groupId, int memberId)
+    {
+        TrySave(() => _store.DeleteMember(groupId, memberId), "Member deleted from the group.");
+        return RedirectToAction(nameof(Groups));
+    }
+
+    [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult SelectGroup(int id)
     {

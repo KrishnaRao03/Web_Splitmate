@@ -9,7 +9,7 @@
     <div>
         <span class="eyebrow">Splitmate feature</span>
         <h1>Create and switch groups</h1>
-        <p>Admins can create, edit, and delete groups. Members can view groups and switch the active workspace.</p>
+        <p>Admins can create, edit, and delete groups, plus add, edit, or remove group members. Members can view groups and switch the active workspace.</p>
     </div>
     <div class="progress-card">
         <strong>@Model.Groups.Count</strong>
@@ -49,7 +49,7 @@
             <div class="admin-lock">
                 <span class="eyebrow">Member access</span>
                 <h2>Group management is admin-only</h2>
-                <p>You can view groups and switch the active group, but only an admin can create, edit, or delete groups.</p>
+                <p>You can view groups and switch the active group, but only an admin can manage groups or members.</p>
             </div>
         }
     </article>
@@ -66,13 +66,67 @@
         <div class="member-list">
             @foreach (var member in Model.Group.Members)
             {
-                <div>
-                    <strong>@member.Name</strong>
-                    <span>@member.Email</span>
-                    <em>@member.Role</em>
+                <div class="member-card">
+                    @if (isAdmin)
+                    {
+                        <form asp-controller="Home" asp-action="EditMember" method="post" class="member-edit-form">
+                            <input type="hidden" name="GroupId" value="@Model.Group.Id" />
+                            <input type="hidden" name="MemberId" value="@member.Id" />
+                            <label>
+                                Name
+                                <input name="Name" class="form-control" value="@member.Name" required />
+                            </label>
+                            <label>
+                                Email
+                                <input name="Email" class="form-control" type="email" value="@member.Email" />
+                            </label>
+                            <label>
+                                Role
+                                <input name="Role" class="form-control" value="@member.Role" />
+                            </label>
+                            <div class="member-actions">
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Save member</button>
+                            </div>
+                        </form>
+                        <form asp-controller="Home" asp-action="DeleteMember" method="post" class="member-delete-form">
+                            <input type="hidden" name="groupId" value="@Model.Group.Id" />
+                            <input type="hidden" name="memberId" value="@member.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete member</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <strong>@member.Name</strong>
+                        <span>@member.Email</span>
+                        <em>@member.Role</em>
+                    }
                 </div>
             }
         </div>
+        @if (isAdmin)
+        {
+            <div class="member-management">
+                <span class="eyebrow">Admin only</span>
+                <h3>Add member</h3>
+                <form asp-controller="Home" asp-action="AddMember" method="post" class="member-add-form">
+                    <input type="hidden" name="GroupId" value="@Model.Group.Id" />
+                    <label>
+                        Name
+                        <input name="Name" class="form-control" placeholder="New member name" required />
+                    </label>
+                    <label>
+                        Email
+                        <input name="Email" class="form-control" type="email" placeholder="member@example.com" />
+                    </label>
+                    <label>
+                        Role
+                        <input name="Role" class="form-control" value="Roommate" />
+                    </label>
+                    <button type="submit" class="btn btn-primary">Add member</button>
+                </form>
+                <p class="form-hint">New members can be deleted immediately. Members already used in expenses, payments, notes, or tasks are protected from deletion.</p>
+            </div>
+        }
     </article>
 </section>
 

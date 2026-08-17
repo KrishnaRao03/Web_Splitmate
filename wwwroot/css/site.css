@@ -356,7 +356,7 @@ a {
 .method-list div,
 .note-card,
 .task-row,
-.member-list div,
+.member-card,
 .group-mini-card {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -556,15 +556,56 @@ a {
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
 
-.member-list div {
+.member-card {
   display: grid;
-  gap: 2px;
+  gap: 10px;
 }
 
 .member-list span,
 .member-list em {
   color: var(--muted);
   font-style: normal;
+}
+
+.member-edit-form,
+.member-add-form {
+  display: grid;
+  gap: 10px;
+}
+
+.member-edit-form label,
+.member-add-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.member-actions,
+.member-delete-form {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.member-management {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.member-management h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 850;
+}
+
+.member-add-form {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  align-items: end;
 }
 
 .group-grid {

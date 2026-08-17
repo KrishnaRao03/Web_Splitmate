@@ -7,6 +7,7 @@ This is an ASP.NET Core MVC final project based on the feature set from the orig
 - Login with admin and member demo accounts
 - Dashboard with total shared spend, group count, open tasks, outstanding balances, and recent activity
 - Admin-only group create, edit, delete, and reset controls
+- Admin-only member add, edit, and delete controls inside each group
 - Member access for viewing and switching active groups
 - Add expenses using Equal, Exact, or Percentage split logic
 - Automatic member share validation and balance recalculation
@@ -74,11 +75,12 @@ Keep the video between 8 and 10 minutes.
 3. Log in as admin and show Dashboard summary cards.
 4. Open the code and explain Models, Services, Controllers, Views, and cookie authentication.
 5. Create a new group from the Groups page and show that it becomes active.
-6. Edit and delete a group as admin.
-7. Log out, log in as member, and show that group management controls are hidden.
-8. Add an expense with Equal split, then add Exact or Percentage split.
-9. Open Balances and show recalculated balances plus settlement suggestions.
-10. Record a payment, add a note, add a task, and complete a task.
+6. Add, edit, and delete a group member as admin.
+7. Edit and delete a group as admin.
+8. Log out, log in as member, and show that group and member management controls are hidden.
+9. Add an expense with Equal split, then add Exact or Percentage split.
+10. Open Balances and show recalculated balances plus settlement suggestions.
+11. Record a payment, add a note, add a task, and complete a task.
 
 ## Demo Login Accounts
 
@@ -93,7 +95,7 @@ Save screenshots in the `screenshots` folder before uploading them to Blackboard
 
 - Login page with demo accounts
 - Dashboard summary
-- Groups page as admin with create/edit/delete controls
+- Groups page as admin with group and member management controls
 - Groups page as member with read-only group management
 - Expense form and expense ledger
 - Balance table and settlement suggestions

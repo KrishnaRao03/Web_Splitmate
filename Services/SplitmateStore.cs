@@ -127,6 +127,74 @@ public class SplitmateStore
         }
     }
 
+    public void AddMember(AddMemberFormModel form)
+    {
+        lock (_gate)
+        {
+            var state = FindGroup(form.GroupId);
+            var name = NormalizeNewMemberName(state, form.Name, null);
+            var email = string.IsNullOrWhiteSpace(form.Email) ? BuildEmail(name) : form.Email.Trim();
+            var role = string.IsNullOrWhiteSpace(form.Role) ? "Roommate" : form.Role.Trim();
+
+            state.Group.Members.Add(new Member
+            {
+                Id = state.Group.Members.Count == 0 ? 1 : state.Group.Members.Max(member => member.Id) + 1,
+                Name = name,
+                Email = email,
+                Role = role
+            });
+        }
+    }
+
+    public void UpdateMember(EditMemberFormModel form)
+    {
+        lock (_gate)
+        {
+            var state = FindGroup(form.GroupId);
+            var member = state.Group.Members.FirstOrDefault(item => item.Id == form.MemberId);
+
+            if (member is null)
+            {
+                throw new InvalidOperationException("That member could not be found.");
+            }
+
+            var oldName = member.Name;
+            var newName = NormalizeNewMemberName(state, form.Name, form.MemberId);
+            member.Name = newName;
+            member.Email = string.IsNullOrWhiteSpace(form.Email) ? BuildEmail(newName) : form.Email.Trim();
+            member.Role = string.IsNullOrWhiteSpace(form.Role) ? "Roommate" : form.Role.Trim();
+
+            RenameMemberReferences(state, oldName, newName);
+        }
+    }
+
+    public void DeleteMember(int groupId, int memberId)
+    {
+        lock (_gate)
+        {
+            var state = FindGroup(groupId);
+
+            if (state.Group.Members.Count <= 2)
+            {
+                throw new InvalidOperationException("A group must keep at least two members.");
+            }
+
+            var member = state.Group.Members.FirstOrDefault(item => item.Id == memberId);
+
+            if (member is null)
+            {
+                throw new InvalidOperationException("That member could not be found.");
+            }
+
+            if (MemberHasActivity(state, member.Name))
+            {
+                throw new InvalidOperationException("Members with expenses, payments, notes, or tasks cannot be deleted because they are part of the group history.");
+            }
+
+            state.Group.Members.Remove(member);
+        }
+    }
+
     public void AddExpense(ExpenseFormModel form)
     {
         lock (_gate)
@@ -568,6 +636,87 @@ public class SplitmateStore
         }
 
         return _groups.FirstOrDefault(group => group.Group.Id == _activeGroupId) ?? _groups[0];
+    }
+
+    private GroupState FindGroup(int groupId)
+    {
+        return _groups.FirstOrDefault(group => group.Group.Id == groupId)
+            ?? throw new InvalidOperationException("That group could not be found.");
+    }
+
+    private string NormalizeNewMemberName(GroupState state, string value, int? existingMemberId)
+    {
+        var name = value?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new InvalidOperationException("Member name is required.");
+        }
+
+        var duplicate = state.Group.Members.Any(member =>
+            member.Id != existingMemberId
+            && string.Equals(member.Name, name, StringComparison.OrdinalIgnoreCase));
+
+        if (duplicate)
+        {
+            throw new InvalidOperationException($"'{name}' is already a member of this group.");
+        }
+
+        return name;
+    }
+
+    private void RenameMemberReferences(GroupState state, string oldName, string newName)
+    {
+        if (string.Equals(oldName, newName, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        foreach (var expense in state.Expenses)
+        {
+            if (expense.PaidBy == oldName)
+            {
+                expense.PaidBy = newName;
+            }
+
+            foreach (var share in expense.Shares.Where(share => share.MemberName == oldName))
+            {
+                share.MemberName = newName;
+            }
+        }
+
+        foreach (var payment in state.Payments)
+        {
+            if (payment.FromMember == oldName)
+            {
+                payment.FromMember = newName;
+            }
+
+            if (payment.ToMember == oldName)
+            {
+                payment.ToMember = newName;
+            }
+        }
+
+        foreach (var note in state.Notes.Where(note => note.CreatedBy == oldName))
+        {
+            note.CreatedBy = newName;
+        }
+
+        foreach (var task in state.Tasks.Where(task => task.AssignedTo == oldName))
+        {
+            task.AssignedTo = newName;
+        }
+    }
+
+    private bool MemberHasActivity(GroupState state, string memberName)
+    {
+        return state.Expenses.Any(expense =>
+                expense.PaidBy == memberName
+                || expense.Shares.Any(share => share.MemberName == memberName && share.Amount > 0))
+            || state.Payments.Any(payment => payment.FromMember == memberName || payment.ToMember == memberName)
+            || state.Notes.Any(note => note.CreatedBy == memberName)
+            || state.Tasks.Any(task => task.AssignedTo == memberName);
     }
 
     private string NormalizeMember(GroupState state, string value)
