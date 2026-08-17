@@ -249,8 +249,7 @@ a {
   background: linear-gradient(180deg, #ffffff, #f7fbfb);
 }
 
-.metric-label,
-.eyebrow {
+.metric-label {
   display: block;
   color: var(--muted);
   font-size: 0.78rem;
@@ -481,11 +480,6 @@ a {
 .form-check-input:focus {
   border-color: var(--teal);
   box-shadow: 0 0 0 0.2rem rgba(15, 118, 110, 0.18);
-}
-
-.form-hint {
-  color: var(--muted);
-  font-weight: 500;
 }
 
 .app-table {

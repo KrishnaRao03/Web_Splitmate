@@ -7,9 +7,7 @@
 
 <section class="page-header">
     <div>
-        <span class="eyebrow">Splitmate feature</span>
         <h1>Create and switch groups</h1>
-        <p>Admins can create, edit, and delete groups, plus add, edit, or remove group members. Members can view groups and switch the active workspace.</p>
     </div>
     <div class="progress-card">
         <strong>@Model.Groups.Count</strong>
@@ -23,7 +21,6 @@
         {
             <div class="section-heading">
                 <div>
-                    <span class="eyebrow">Admin only</span>
                     <h2>New group</h2>
                 </div>
             </div>
@@ -39,7 +36,6 @@
                 <label>
                     Members
                     <textarea name="MembersInput" class="form-control" rows="5" placeholder="Krishna | krishna@example.com&#10;Aanya | aanya@example.com&#10;Mateo | mateo@example.com" required></textarea>
-                    <span class="form-hint">Enter one member per line. Email is optional, but use Name | email when you have it.</span>
                 </label>
                 <button type="submit" class="btn btn-primary">Create group</button>
             </form>
@@ -47,9 +43,7 @@
         else
         {
             <div class="admin-lock">
-                <span class="eyebrow">Member access</span>
                 <h2>Group management is admin-only</h2>
-                <p>You can view groups and switch the active group, but only an admin can manage groups or members.</p>
             </div>
         }
     </article>
@@ -57,7 +51,6 @@
     <article class="panel">
         <div class="section-heading">
             <div>
-                <span class="eyebrow">Active group</span>
                 <h2>@Model.Group.Name</h2>
             </div>
             <span class="status-chip">@Model.Group.Members.Count members</span>
@@ -106,7 +99,6 @@
         @if (isAdmin)
         {
             <div class="member-management">
-                <span class="eyebrow">Admin only</span>
                 <h3>Add member</h3>
                 <form asp-controller="Home" asp-action="AddMember" method="post" class="member-add-form">
                     <input type="hidden" name="GroupId" value="@Model.Group.Id" />
@@ -124,7 +116,6 @@
                     </label>
                     <button type="submit" class="btn btn-primary">Add member</button>
                 </form>
-                <p class="form-hint">New members can be deleted immediately. Members already used in expenses, payments, notes, or tasks are protected from deletion.</p>
             </div>
         }
     </article>
@@ -133,7 +124,6 @@
 <section class="panel">
     <div class="section-heading">
         <div>
-            <span class="eyebrow">Groups</span>
             <h2>Saved group list</h2>
         </div>
     </div>
@@ -142,7 +132,6 @@
         {
             <article class="group-card @(group.Id == Model.ActiveGroupId ? "active" : "")">
                 <div>
-                    <span class="eyebrow">Created @group.CreatedOn.ToString("MMM d")</span>
                     <h3>@group.Name</h3>
                     <p>@group.Description</p>
                 </div>

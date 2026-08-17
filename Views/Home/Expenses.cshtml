@@ -6,9 +6,7 @@
 
 <section class="page-header">
     <div>
-        <span class="eyebrow">Splitmate feature</span>
         <h1>Expense splitting</h1>
-        <p>Add shared costs and split them equally, by exact amount, or by percentage.</p>
     </div>
     <div class="member-strip">
         @foreach (var member in Model.Group.Members)
@@ -22,7 +20,6 @@
     <article class="panel">
         <div class="section-heading">
             <div>
-                <span class="eyebrow">Create</span>
                 <h2>Add a new expense</h2>
             </div>
         </div>
@@ -58,40 +55,15 @@
             <label>
                 Shares for exact or percentage split
                 <textarea name="ShareInput" class="form-control" data-share-input rows="3" placeholder="Krishna=25, Aanya=25, Mateo=25, Priya=25"></textarea>
-                <span class="form-hint" data-share-hint>Equal split does not need custom shares.</span>
             </label>
             <button type="submit" class="btn btn-primary">Save expense</button>
         </form>
-    </article>
-
-    <article class="panel">
-        <div class="section-heading">
-            <div>
-                <span class="eyebrow">How it works</span>
-                <h2>Split methods</h2>
-            </div>
-        </div>
-        <div class="method-list">
-            <div>
-                <strong>Equal</strong>
-                <p>The amount is divided evenly across all group members.</p>
-            </div>
-            <div>
-                <strong>Exact</strong>
-                <p>Enter each member's dollar amount, and the app validates that the total matches the bill.</p>
-            </div>
-            <div>
-                <strong>Percentage</strong>
-                <p>Enter percentages by member, and the app validates that the total equals 100%.</p>
-            </div>
-        </div>
     </article>
 </section>
 
 <section class="panel">
     <div class="section-heading">
         <div>
-            <span class="eyebrow">History</span>
             <h2>Expense ledger</h2>
         </div>
         <strong>@Model.TotalExpenses.ToString("C") total</strong>

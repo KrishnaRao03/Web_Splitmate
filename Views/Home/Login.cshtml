@@ -8,9 +8,7 @@
 <section class="login-shell">
     <article class="login-card">
         <div>
-            <span class="eyebrow">Splitmate access</span>
             <h1>Login</h1>
-            <p>Use the admin account to manage groups, or use the member account to test regular user access.</p>
         </div>
         <form asp-controller="Home" asp-action="Login" method="post" class="stacked-form">
             <input type="hidden" asp-for="ReturnUrl" />
@@ -31,8 +29,7 @@
     </article>
 
     <aside class="panel account-panel">
-        <span class="eyebrow">Demo accounts</span>
-        <h2>Use these in the video</h2>
+        <h2>Demo accounts</h2>
         <div class="account-list">
             @foreach (var user in demoUsers)
             {

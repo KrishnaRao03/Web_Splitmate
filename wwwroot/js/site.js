@@ -3,12 +3,16 @@ const shareInput = document.querySelector("[data-share-input]");
 const shareHint = document.querySelector("[data-share-hint]");
 
 function refreshShareHint() {
-  if (!splitMethod || !shareInput || !shareHint) {
+  if (!splitMethod || !shareInput) {
     return;
   }
 
   const method = splitMethod.value;
   shareInput.disabled = method === "Equal";
+
+  if (!shareHint) {
+    return;
+  }
 
   if (method === "Equal") {
     shareInput.value = "";
