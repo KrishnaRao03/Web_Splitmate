@@ -171,20 +171,6 @@ public class AddMemberFormModel
     public string Role { get; set; } = "Roommate";
 }
 
-public class EditMemberFormModel
-{
-    public int GroupId { get; set; }
-    public int MemberId { get; set; }
-
-    [Required]
-    public string Name { get; set; } = string.Empty;
-
-    [EmailAddress]
-    public string Email { get; set; } = string.Empty;
-
-    public string Role { get; set; } = "Roommate";
-}
-
 public class LoginFormModel
 {
     [Required]

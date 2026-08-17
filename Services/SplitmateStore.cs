@@ -146,28 +146,6 @@ public class SplitmateStore
         }
     }
 
-    public void UpdateMember(EditMemberFormModel form)
-    {
-        lock (_gate)
-        {
-            var state = FindGroup(form.GroupId);
-            var member = state.Group.Members.FirstOrDefault(item => item.Id == form.MemberId);
-
-            if (member is null)
-            {
-                throw new InvalidOperationException("That member could not be found.");
-            }
-
-            var oldName = member.Name;
-            var newName = NormalizeNewMemberName(state, form.Name, form.MemberId);
-            member.Name = newName;
-            member.Email = string.IsNullOrWhiteSpace(form.Email) ? BuildEmail(newName) : form.Email.Trim();
-            member.Role = string.IsNullOrWhiteSpace(form.Role) ? "Roommate" : form.Role.Trim();
-
-            RenameMemberReferences(state, oldName, newName);
-        }
-    }
-
     public void DeleteMember(int groupId, int memberId)
     {
         lock (_gate)
@@ -663,50 +641,6 @@ public class SplitmateStore
         }
 
         return name;
-    }
-
-    private void RenameMemberReferences(GroupState state, string oldName, string newName)
-    {
-        if (string.Equals(oldName, newName, StringComparison.OrdinalIgnoreCase))
-        {
-            return;
-        }
-
-        foreach (var expense in state.Expenses)
-        {
-            if (expense.PaidBy == oldName)
-            {
-                expense.PaidBy = newName;
-            }
-
-            foreach (var share in expense.Shares.Where(share => share.MemberName == oldName))
-            {
-                share.MemberName = newName;
-            }
-        }
-
-        foreach (var payment in state.Payments)
-        {
-            if (payment.FromMember == oldName)
-            {
-                payment.FromMember = newName;
-            }
-
-            if (payment.ToMember == oldName)
-            {
-                payment.ToMember = newName;
-            }
-        }
-
-        foreach (var note in state.Notes.Where(note => note.CreatedBy == oldName))
-        {
-            note.CreatedBy = newName;
-        }
-
-        foreach (var task in state.Tasks.Where(task => task.AssignedTo == oldName))
-        {
-            task.AssignedTo = newName;
-        }
     }
 
     private bool MemberHasActivity(GroupState state, string memberName)

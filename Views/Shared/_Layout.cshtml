@@ -34,11 +34,11 @@
                         <span class="top-nav-icon">$</span>
                         <span>Split</span>
                     </a>
-                    <a asp-controller="Home" asp-action="NotesTasks" asp-fragment="tasks" class="top-nav-item @(title == "Notes & Tasks" ? "active" : "")" data-nav-key="tasks">
+                    <a asp-controller="Home" asp-action="Tasks" class="top-nav-item @(title == "Tasks" ? "active" : "")" data-nav-key="tasks">
                         <span class="top-nav-icon">T</span>
                         <span>Tasks</span>
                     </a>
-                    <a asp-controller="Home" asp-action="NotesTasks" asp-fragment="notes" class="top-nav-item" data-nav-key="notes">
+                    <a asp-controller="Home" asp-action="Notes" class="top-nav-item @(title == "Notes" ? "active" : "")" data-nav-key="notes">
                         <span class="top-nav-icon">N</span>
                         <span>Notes</span>
                     </a>

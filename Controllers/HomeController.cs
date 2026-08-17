@@ -97,7 +97,12 @@ public class HomeController : Controller
         return View(_store.GetDashboard());
     }
 
-    public IActionResult NotesTasks()
+    public IActionResult Notes()
+    {
+        return View(_store.GetDashboard());
+    }
+
+    public IActionResult Tasks()
     {
         return View(_store.GetDashboard());
     }
@@ -146,15 +151,6 @@ public class HomeController : Controller
     [HttpPost]
     [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
-    public IActionResult EditMember(EditMemberFormModel form)
-    {
-        TrySave(() => _store.UpdateMember(form), "Member details updated.");
-        return RedirectToAction(nameof(Groups));
-    }
-
-    [HttpPost]
-    [Authorize(Roles = "Admin")]
-    [ValidateAntiForgeryToken]
     public IActionResult DeleteMember(int groupId, int memberId)
     {
         TrySave(() => _store.DeleteMember(groupId, memberId), "Member deleted from the group.");
@@ -190,7 +186,7 @@ public class HomeController : Controller
     public IActionResult AddNote(NoteFormModel form)
     {
         TrySave(() => _store.AddNote(form), "Group note added.");
-        return RedirectToAction(nameof(NotesTasks));
+        return RedirectToAction(nameof(Notes));
     }
 
     [HttpPost]
@@ -198,7 +194,7 @@ public class HomeController : Controller
     public IActionResult AddTask(TaskFormModel form)
     {
         TrySave(() => _store.AddTask(form), "Task added to the group board.");
-        return RedirectToAction(nameof(NotesTasks));
+        return RedirectToAction(nameof(Tasks));
     }
 
     [HttpPost]
@@ -207,7 +203,7 @@ public class HomeController : Controller
     {
         _store.CompleteTask(id);
         TempData["StatusMessage"] = "Task status updated.";
-        return RedirectToAction(nameof(NotesTasks));
+        return RedirectToAction(nameof(Tasks));
     }
 
     [HttpPost]

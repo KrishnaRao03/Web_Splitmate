@@ -1,0 +1,70 @@
+@model SplitmateDashboardViewModel
+
+@{
+    ViewData["Title"] = "Notes";
+}
+
+<section class="page-header">
+    <div>
+        <h1>Shared Notes</h1>
+        <p>@Model.Group.Name</p>
+    </div>
+</section>
+
+<section class="content-grid two-col">
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <h2>Add Note</h2>
+            </div>
+        </div>
+        <form asp-controller="Home" asp-action="AddNote" method="post" class="stacked-form">
+            <label>
+                Title
+                <input name="Title" class="form-control" required />
+            </label>
+            <label>
+                Created by
+                <select name="CreatedBy" class="form-select">
+                    @foreach (var member in Model.Group.Members)
+                    {
+                        <option value="@member.Name">@member.Name</option>
+                    }
+                </select>
+            </label>
+            <label>
+                Details
+                <textarea name="Body" class="form-control" rows="3"></textarea>
+            </label>
+            <label class="check-line">
+                <input name="IsPinned" value="true" type="checkbox" />
+                Pin this note
+            </label>
+            <button type="submit" class="btn btn-primary">Save note</button>
+        </form>
+    </article>
+
+    <article class="panel">
+        <div class="section-heading">
+            <div>
+                <h2>Notes</h2>
+            </div>
+        </div>
+        <div class="note-grid">
+            @foreach (var note in Model.Notes)
+            {
+                <div class="note-card">
+                    <div class="note-topline">
+                        <strong>@note.Title</strong>
+                        @if (note.IsPinned)
+                        {
+                            <span>Pinned</span>
+                        }
+                    </div>
+                    <p>@note.Body</p>
+                    <small>@note.CreatedBy - @note.CreatedOn.ToString("MMM d")</small>
+                </div>
+            }
+        </div>
+    </article>
+</section>

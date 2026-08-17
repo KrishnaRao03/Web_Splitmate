@@ -561,13 +561,11 @@ a {
   font-style: normal;
 }
 
-.member-edit-form,
 .member-add-form {
   display: grid;
   gap: 10px;
 }
 
-.member-edit-form label,
 .member-add-form label {
   display: grid;
   gap: 6px;
@@ -1602,7 +1600,6 @@ a:hover {
 .stacked-form label,
 .auth-form label,
 .group-edit-form label,
-.member-edit-form label,
 .member-add-form label {
   display: grid;
   gap: 7px;
@@ -1697,5 +1694,94 @@ a:hover {
   .activity-item {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+.member-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.member-info {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+}
+
+.member-info > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.member-info span:not(.member-avatar),
+.member-info strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.member-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+}
+
+.member-delete-form {
+  justify-content: flex-end;
+}
+
+.member-add-form {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+}
+
+.group-edit-details {
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+}
+
+.group-edit-details summary {
+  width: fit-content;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  padding: 7px 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 900;
+  list-style: none;
+}
+
+.group-edit-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.group-edit-details summary:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-strong);
+}
+
+.group-edit-details[open] summary {
+  margin-bottom: 12px;
+}
+
+.group-edit-details .group-edit-form {
+  border-top: 0;
+  padding-top: 0;
+}
+
+@media (max-width: 620px) {
+  .member-row,
+  .member-add-form {
+    grid-template-columns: 1fr;
+  }
+
+  .member-delete-form {
+    justify-content: flex-start;
   }
 }

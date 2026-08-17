@@ -59,39 +59,22 @@
         <div class="member-list">
             @foreach (var member in Model.Group.Members)
             {
-                <div class="member-card">
+                <div class="member-card member-row">
+                    <div class="member-info">
+                        <span class="member-avatar">@member.Name[..1].ToUpperInvariant()</span>
+                        <div>
+                            <strong>@member.Name</strong>
+                            <span>@member.Email</span>
+                        </div>
+                    </div>
+                    <em>@member.Role</em>
                     @if (isAdmin)
                     {
-                        <form asp-controller="Home" asp-action="EditMember" method="post" class="member-edit-form">
-                            <input type="hidden" name="GroupId" value="@Model.Group.Id" />
-                            <input type="hidden" name="MemberId" value="@member.Id" />
-                            <label>
-                                Name
-                                <input name="Name" class="form-control" value="@member.Name" required />
-                            </label>
-                            <label>
-                                Email
-                                <input name="Email" class="form-control" type="email" value="@member.Email" />
-                            </label>
-                            <label>
-                                Role
-                                <input name="Role" class="form-control" value="@member.Role" />
-                            </label>
-                            <div class="member-actions">
-                                <button type="submit" class="btn btn-sm btn-outline-primary">Save member</button>
-                            </div>
-                        </form>
                         <form asp-controller="Home" asp-action="DeleteMember" method="post" class="member-delete-form">
                             <input type="hidden" name="groupId" value="@Model.Group.Id" />
                             <input type="hidden" name="memberId" value="@member.Id" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete member</button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                         </form>
-                    }
-                    else
-                    {
-                        <strong>@member.Name</strong>
-                        <span>@member.Email</span>
-                        <em>@member.Role</em>
                     }
                 </div>
             }
@@ -109,10 +92,6 @@
                     <label>
                         Email
                         <input name="Email" class="form-control" type="email" placeholder="member@example.com" />
-                    </label>
-                    <label>
-                        Role
-                        <input name="Role" class="form-control" value="Roommate" />
                     </label>
                     <button type="submit" class="btn btn-primary">Add member</button>
                 </form>
@@ -138,18 +117,21 @@
 
                 @if (isAdmin)
                 {
-                    <form asp-controller="Home" asp-action="EditGroup" method="post" class="group-edit-form">
-                        <input type="hidden" name="Id" value="@group.Id" />
-                        <label>
-                            Group name
-                            <input name="Name" class="form-control" value="@group.Name" required />
-                        </label>
-                        <label>
-                            Description
-                            <textarea name="Description" class="form-control" rows="3">@group.Description</textarea>
-                        </label>
-                        <button type="submit" class="btn btn-sm btn-outline-primary">Save changes</button>
-                    </form>
+                    <details class="group-edit-details">
+                        <summary>Edit</summary>
+                        <form asp-controller="Home" asp-action="EditGroup" method="post" class="group-edit-form">
+                            <input type="hidden" name="Id" value="@group.Id" />
+                            <label>
+                                Group name
+                                <input name="Name" class="form-control" value="@group.Name" required />
+                            </label>
+                            <label>
+                                Description
+                                <textarea name="Description" class="form-control" rows="3">@group.Description</textarea>
+                            </label>
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Save changes</button>
+                        </form>
+                    </details>
                 }
 
                 <div class="group-card-footer">

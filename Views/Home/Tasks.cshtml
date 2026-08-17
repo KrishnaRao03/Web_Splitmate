@@ -1,12 +1,13 @@
 @model SplitmateDashboardViewModel
 
 @{
-    ViewData["Title"] = "Notes & Tasks";
+    ViewData["Title"] = "Tasks";
 }
 
 <section class="page-header">
     <div>
-        <h1>Group notes and tasks</h1>
+        <h1>Tasks</h1>
+        <p>@Model.Group.Name</p>
     </div>
     <div class="progress-card">
         <strong>@Model.ProgressPercent%</strong>
@@ -15,42 +16,10 @@
 </section>
 
 <section class="content-grid two-col">
-    <article class="panel" id="notes">
+    <article class="panel">
         <div class="section-heading">
             <div>
-                <h2>Add group note</h2>
-            </div>
-        </div>
-        <form asp-controller="Home" asp-action="AddNote" method="post" class="stacked-form">
-            <label>
-                Title
-                <input name="Title" class="form-control" required />
-            </label>
-            <label>
-                Created by
-                <select name="CreatedBy" class="form-select">
-                    @foreach (var member in Model.Group.Members)
-                    {
-                        <option value="@member.Name">@member.Name</option>
-                    }
-                </select>
-            </label>
-            <label>
-                Details
-                <textarea name="Body" class="form-control" rows="3"></textarea>
-            </label>
-            <label class="check-line">
-                <input name="IsPinned" value="true" type="checkbox" />
-                Pin this note
-            </label>
-            <button type="submit" class="btn btn-primary">Save note</button>
-        </form>
-    </article>
-
-    <article class="panel" id="tasks">
-        <div class="section-heading">
-            <div>
-                <h2>Add task</h2>
+                <h2>Add Task</h2>
             </div>
         </div>
         <form asp-controller="Home" asp-action="AddTask" method="post" class="stacked-form">
@@ -75,32 +44,6 @@
             </div>
             <button type="submit" class="btn btn-primary">Save task</button>
         </form>
-    </article>
-</section>
-
-<section class="content-grid two-col">
-    <article class="panel">
-        <div class="section-heading">
-            <div>
-                <h2>Current notes</h2>
-            </div>
-        </div>
-        <div class="note-grid">
-            @foreach (var note in Model.Notes)
-            {
-                <div class="note-card">
-                    <div class="note-topline">
-                        <strong>@note.Title</strong>
-                        @if (note.IsPinned)
-                        {
-                            <span>Pinned</span>
-                        }
-                    </div>
-                    <p>@note.Body</p>
-                    <small>@note.CreatedBy - @note.CreatedOn.ToString("MMM d")</small>
-                </div>
-            }
-        </div>
     </article>
 
     <article class="panel">

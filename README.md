@@ -44,7 +44,8 @@ Final_Project/
       Groups.cshtml
       Expenses.cshtml
       Balances.cshtml
-      NotesTasks.cshtml
+      Notes.cshtml
+      Tasks.cshtml
   wwwroot/
     css/site.css
     js/site.js
@@ -100,7 +101,8 @@ Save screenshots in the `screenshots` folder before uploading them to Blackboard
 - Expense form and expense ledger
 - Balance table and settlement suggestions
 - Payment ledger after recording a payment
-- Notes and tasks board
+- Notes page
+- Tasks page
 - GitHub repository page
 
 ## GitHub Upload

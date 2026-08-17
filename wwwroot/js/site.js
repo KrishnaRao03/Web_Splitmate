@@ -47,8 +47,10 @@ function refreshSplitmateNav() {
     activeKey = "home";
   } else if (path.includes("/home/expenses") || path.includes("/home/balances")) {
     activeKey = "split";
-  } else if (path.includes("/home/notestasks")) {
-    activeKey = hash === "#notes" ? "notes" : "tasks";
+  } else if (path.includes("/home/tasks")) {
+    activeKey = "tasks";
+  } else if (path.includes("/home/notes")) {
+    activeKey = "notes";
   }
 
   items.forEach((item) => item.classList.toggle("active", item.dataset.navKey === activeKey));
