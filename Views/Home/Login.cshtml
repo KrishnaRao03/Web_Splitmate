@@ -5,31 +5,33 @@
     var demoUsers = ViewBag.DemoUsers as IReadOnlyList<UserAccount> ?? Array.Empty<UserAccount>();
 }
 
-<section class="login-shell">
-    <article class="login-card">
-        <div>
-            <h1>Login</h1>
+<section class="auth-container">
+    <article class="auth-card">
+        <div class="auth-header">
+            <img class="auth-logo" src="~/images/splitmate-logo-transparent.png" alt="Splitmate" />
+            <h1>Welcome back</h1>
+            <p>Sign in to continue managing shared expenses</p>
         </div>
-        <form asp-controller="Home" asp-action="Login" method="post" class="stacked-form">
+
+        <form asp-controller="Home" asp-action="Login" method="post" class="auth-form">
             <input type="hidden" asp-for="ReturnUrl" />
-            <label>
-                Email
+            <div class="form-group">
+                <label asp-for="Email">Email</label>
                 <input asp-for="Email" class="form-control" autocomplete="username" required />
-            </label>
-            <label>
-                Password
+            </div>
+            <div class="form-group">
+                <label asp-for="Password">Password</label>
                 <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" required />
-            </label>
+            </div>
             <label class="check-line">
                 <input asp-for="RememberMe" />
                 Keep me logged in
             </label>
-            <button type="submit" class="btn btn-primary">Login</button>
+            <button type="submit" class="btn btn-primary btn-full">Sign In</button>
         </form>
-    </article>
 
-    <aside class="panel account-panel">
-        <h2>Demo accounts</h2>
+        <div class="demo-accounts">
+            <h2>Demo accounts</h2>
         <div class="account-list">
             @foreach (var user in demoUsers)
             {
@@ -40,5 +42,6 @@
                 </div>
             }
         </div>
-    </aside>
+        </div>
+    </article>
 </section>

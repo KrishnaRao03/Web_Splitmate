@@ -32,3 +32,27 @@ document.querySelectorAll("[data-checklist] input[type='checkbox']").forEach((ch
   checkbox.checked = localStorage.getItem(key) === "true";
   checkbox.addEventListener("change", () => localStorage.setItem(key, checkbox.checked));
 });
+
+function refreshSplitmateNav() {
+  const items = document.querySelectorAll("[data-nav-key]");
+  if (!items.length) {
+    return;
+  }
+
+  const path = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+  let activeKey = "";
+
+  if (path === "/" || path.endsWith("/home") || path.endsWith("/home/index")) {
+    activeKey = "home";
+  } else if (path.includes("/home/expenses") || path.includes("/home/balances")) {
+    activeKey = "split";
+  } else if (path.includes("/home/notestasks")) {
+    activeKey = hash === "#notes" ? "notes" : "tasks";
+  }
+
+  items.forEach((item) => item.classList.toggle("active", item.dataset.navKey === activeKey));
+}
+
+window.addEventListener("hashchange", refreshSplitmateNav);
+refreshSplitmateNav();

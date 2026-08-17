@@ -2,125 +2,197 @@
 
 @{
     ViewData["Title"] = "Dashboard";
+    var totalOwedToGroup = Model.Balances.Where(balance => balance.NetBalance > 0).Sum(balance => balance.NetBalance);
+    var totalGroupOwes = Math.Abs(Model.Balances.Where(balance => balance.NetBalance < 0).Sum(balance => balance.NetBalance));
+    var topPayer = Model.Balances.OrderByDescending(balance => balance.TotalPaid).FirstOrDefault();
+    var topCategory = Model.Expenses
+        .GroupBy(expense => expense.SplitMethod)
+        .OrderByDescending(group => group.Sum(expense => expense.Amount))
+        .FirstOrDefault();
 }
 
-<section class="dashboard-hero">
-    <div class="hero-copy">
-        <img src="~/images/splitmate-logo-transparent.png" alt="Splitmate logo" class="hero-logo" />
-        <h1>@Model.Group.Name</h1>
-        <p>@Model.Group.Description</p>
-        <div class="hero-actions">
-            <a class="btn btn-primary" asp-controller="Home" asp-action="Expenses">Add expense</a>
-            <a class="btn btn-outline-primary" asp-controller="Home" asp-action="Groups">Create group</a>
+<div class="page-header">
+    <h1>Dashboard</h1>
+    <p>Welcome back, @User.Identity?.Name!</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card stat-positive">
+        <div class="stat-icon">IN</div>
+        <div class="stat-content">
+            <span class="stat-label">You're Owed</span>
+            <span class="stat-value">@totalOwedToGroup.ToString("C")</span>
         </div>
     </div>
-    <div class="hero-panel" aria-label="Project summary">
-        <div>
-            <span class="metric-label">Total shared spend</span>
-            <strong>@Model.TotalExpenses.ToString("C")</strong>
-        </div>
-        <div>
-            <span class="metric-label">Groups</span>
-            <strong>@Model.Groups.Count</strong>
-        </div>
-        <div>
-            <span class="metric-label">Open tasks</span>
-            <strong>@Model.OpenTaskCount</strong>
-        </div>
-        <div>
-            <span class="metric-label">Outstanding</span>
-            <strong>@Model.OutstandingTotal.ToString("C")</strong>
+    <div class="stat-card stat-negative">
+        <div class="stat-icon">OUT</div>
+        <div class="stat-content">
+            <span class="stat-label">You Owe</span>
+            <span class="stat-value">@totalGroupOwes.ToString("C")</span>
         </div>
     </div>
-</section>
-
-<section class="content-grid two-col">
-    <article class="panel">
-        <div class="section-heading">
-            <div>
-                <h2>Balance overview</h2>
-            </div>
-            <a asp-controller="Home" asp-action="Balances">View payments</a>
+    <a class="stat-card stat-card-link" asp-controller="Home" asp-action="Groups">
+        <div class="stat-icon">GR</div>
+        <div class="stat-content">
+            <span class="stat-label">Groups</span>
+            <span class="stat-value">@Model.Groups.Count</span>
         </div>
-        <div class="balance-list">
-            @foreach (var balance in Model.Balances)
-            {
-                <div class="balance-row">
-                    <div>
-                        <strong>@balance.MemberName</strong>
-                        <span>@balance.Status</span>
+    </a>
+</div>
+
+<div class="content-grid">
+    <div class="card">
+        <div class="card-header">
+            <h2>Monthly Spending</h2>
+            <span class="badge">This Month</span>
+        </div>
+        <div class="card-body">
+            <div class="spending-list">
+                @foreach (var group in Model.Groups)
+                {
+                    <div class="spending-item">
+                        <span class="spending-group">@group.Name</span>
+                        <span class="spending-amount">@(group.Id == Model.ActiveGroupId ? Model.TotalExpenses.ToString("C") : "$0.00")</span>
                     </div>
-                    <strong class="@(balance.NetBalance >= 0 ? "positive" : "negative")">@balance.NetBalance.ToString("C")</strong>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Recent Activity</h2>
+        </div>
+        <div class="card-body">
+            @if (Model.Expenses.Any())
+            {
+                <div class="activity-list">
+                    @foreach (var expense in Model.Expenses.Take(4))
+                    {
+                        <div class="activity-item">
+                            <div class="activity-icon">$</div>
+                            <div class="activity-content">
+                                <span class="activity-title">@expense.Description</span>
+                                <span class="activity-meta">@expense.PaidBy - @Model.Group.Name</span>
+                            </div>
+                            <span class="activity-amount">@expense.Amount.ToString("C")</span>
+                        </div>
+                    }
                 </div>
             }
-        </div>
-    </article>
-
-    <article class="panel">
-        <div class="section-heading">
-            <div>
-                <h2>Recent expenses</h2>
-            </div>
-            <a asp-controller="Home" asp-action="Expenses">History</a>
-        </div>
-        <div class="timeline">
-            @foreach (var expense in Model.Expenses.Take(4))
+            else
             {
-                <div class="timeline-item">
-                    <span>@expense.CreatedOn.ToString("MMM d")</span>
-                    <div>
-                        <strong>@expense.Description</strong>
-                        <p>@expense.PaidBy paid @expense.Amount.ToString("C") using @expense.SplitMethod split.</p>
-                    </div>
+                <p class="empty-state">No recent activity</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="card spending-insights-card">
+    <div class="card-header">
+        <h2>Spending Insights</h2>
+        <span class="badge">@Model.Expenses.Count expenses</span>
+    </div>
+    <div class="card-body">
+        <div class="analytics-stats">
+            <div class="analytics-stat">
+                <span>Total</span>
+                <strong>@Model.TotalExpenses.ToString("C")</strong>
+            </div>
+            <div class="analytics-stat">
+                <span>Top Split</span>
+                <strong>@(topCategory?.Key ?? "None")</strong>
+            </div>
+            <div class="analytics-stat">
+                <span>Top Payer</span>
+                <strong>@(topPayer?.MemberName ?? "None")</strong>
+            </div>
+        </div>
+
+        <div class="analytics-grid">
+            <section class="analytics-panel">
+                <h3>By Member</h3>
+                <div class="splitmate-bar-chart">
+                    @foreach (var balance in Model.Balances)
+                    {
+                        var percent = Model.TotalExpenses > 0 ? Math.Min(100, Math.Round(balance.TotalShare / Model.TotalExpenses * 100)) : 0;
+                        <div class="bar-row">
+                            <div class="bar-row-label">
+                                <span>@balance.MemberName</span>
+                                <strong>@balance.TotalShare.ToString("C")</strong>
+                            </div>
+                            <div class="bar-track"><span style="width: @percent%"></span></div>
+                        </div>
+                    }
                 </div>
-            }
-        </div>
-    </article>
-</section>
+            </section>
 
-<section class="content-grid two-col">
-    <article class="panel">
-        <div class="section-heading">
-            <div>
-                <h2>Notes and tasks</h2>
-            </div>
-            <a asp-controller="Home" asp-action="NotesTasks">Open board</a>
+            <section class="analytics-panel">
+                <h3>Paid By</h3>
+                <div class="splitmate-bar-chart">
+                    @foreach (var balance in Model.Balances)
+                    {
+                        var percent = Model.TotalExpenses > 0 ? Math.Min(100, Math.Round(balance.TotalPaid / Model.TotalExpenses * 100)) : 0;
+                        <div class="bar-row">
+                            <div class="bar-row-label">
+                                <span>@balance.MemberName</span>
+                                <strong>@balance.TotalPaid.ToString("C")</strong>
+                            </div>
+                            <div class="bar-track"><span style="width: @percent%"></span></div>
+                        </div>
+                    }
+                </div>
+            </section>
         </div>
-        <div class="progress-block">
-            <div class="progress-value">@Model.ProgressPercent%</div>
-            <div class="progress flex-grow-1" role="progressbar" aria-label="Task completion" aria-valuenow="@Model.ProgressPercent" aria-valuemin="0" aria-valuemax="100">
-                <div class="progress-bar" style="width: @Model.ProgressPercent%"></div>
-            </div>
-        </div>
-        <ul class="clean-list">
-            @foreach (var task in Model.Tasks.Take(3))
+    </div>
+</div>
+
+<div class="card" id="dashboard-groups">
+    <div class="card-header">
+        <h2>Your Groups</h2>
+        <div class="page-actions">
+            @if (User.IsInRole("Admin"))
             {
-                <li>
-                    <span>@task.Title</span>
-                    <strong>@(task.IsComplete ? "Done" : task.DueDate.ToString("MMM d"))</strong>
-                </li>
+                <a class="btn btn-primary btn-sm action-plus" asp-controller="Home" asp-action="Groups">
+                    <span aria-hidden="true">+</span>
+                    <span class="action-plus-label">Group</span>
+                </a>
             }
-        </ul>
-    </article>
-
-    <article class="panel">
-        <div class="section-heading">
-            <div>
-                <h2>Group management</h2>
-            </div>
-            <a asp-controller="Home" asp-action="Groups">Manage groups</a>
         </div>
-        <div class="group-mini-list">
+    </div>
+    <div class="card-body">
+        <div class="groups-grid">
             @foreach (var group in Model.Groups)
             {
-                <div class="group-mini-card @(group.Id == Model.ActiveGroupId ? "active" : "")">
-                    <strong>@group.Name</strong>
-                    <span>@group.Members.Count members</span>
+                <div class="group-card @(group.Id == Model.ActiveGroupId ? "active" : "")">
+                    <div class="group-header">
+                        <h3>@group.Name</h3>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <span class="badge badge-admin">Admin</span>
+                        }
+                    </div>
+                    <div class="group-members">
+                        <span class="members-count">@group.Members.Count members</span>
+                        <div class="members-avatars">
+                            @foreach (var member in group.Members.Take(4))
+                            {
+                                <span class="mini-avatar" title="@member.Name">@member.Name[..1].ToUpperInvariant()</span>
+                            }
+                            @if (group.Members.Count > 4)
+                            {
+                                <span class="mini-avatar more">+@(group.Members.Count - 4)</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="group-actions">
+                        <a class="btn btn-sm btn-outline-primary" asp-controller="Home" asp-action="Groups">Manage</a>
+                    </div>
                 </div>
             }
         </div>
-    </article>
-</section>
+    </div>
+</div>
 
 @if (User.IsInRole("Admin"))
 {
